@@ -1,0 +1,8 @@
+<div>
+    <div class="alert alert-danger" v-if="error" v-html="error"></div>
+
+    <h1><a :href="domain.resolvedUrl" v-text="domain.name" target="_blank"></a></h1>
+    <hr>
+
+    <pre class="card" v-text="domain"></pre>
+</div>
