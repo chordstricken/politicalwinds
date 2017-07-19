@@ -12,7 +12,7 @@ use models\Job;
 if (!isset($_REQUEST['id']))
     Response::init('Please provide a id', 400)->send();
 
-if ($domain = Job::findOne(['id' => $_REQUEST['id']]))
-    Response::init($domain)->send();
+if ($result = Job::findOne(['id' => $_REQUEST['id']]))
+    Response::init($result)->send();
 
 Response::init("Job not found", 404);

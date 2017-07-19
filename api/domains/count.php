@@ -8,6 +8,6 @@ require_once __DIR__ . '/../../core.php';
 
 $query = isset($_REQUEST['query']) ? json_decode($_REQUEST['query']) : [];
 
-$results = models\Job::count($query);
+$results = models\Domain::count($query);
 
 core\api\Response::init($results)->send();

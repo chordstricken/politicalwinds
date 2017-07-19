@@ -28,19 +28,13 @@ class SEOMoz extends \core\Job {
      */
     protected function doWork() {
 
-        if (!isset($this->params->query))
-            $this->params->query = [
-                '$or' => [
-                    ['moz.domainAuthority' => ['$eq' => null]],
-                    ['moz.externalEquityLinks' => ['$eq' => null]],
-                ],
-            ];
 
-        if (!isset($this->domains))
-            $this->domains = Domain::findMulti($this->params->query);
+        if (!isset($this->params->domains) || !is_array($this->params->domains))
+            throw new Exception("No Domains to pull.");
 
+        $this->params->domains = array_map("core\\Format::domain", $this->params->domains);
 
-        $domainsToFetch = Domain::findMulti($this->params->query, ['limit' => 50]);
+        $domainsToFetch = Domain::findMulti(['name' => ['$in' => array_values($this->params->domains)]]);
 
         Debug::info("Found " . count($domainsToFetch) . " domains to fetch from seoMoz");
 
@@ -54,6 +48,7 @@ class SEOMoz extends \core\Job {
                 self::applyDomainResult($domain, $data);
 
                 try {
+                    $domain->moz->dateModified = time();
                     $domain->update([
                         'moz'          => $domain->moz,
                         'dateModified' => time(),

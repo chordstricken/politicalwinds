@@ -16,16 +16,20 @@ use PHPHtmlParser\Dom;
  */
 class Scrape extends \core\Job {
 
+    /** @var Domain[] */
+    private $domains;
+
     /**
      * Main work function
      */
     protected function doWork() {
 
-        if (!isset($this->params->query))
-            $this->params->query = ['scrape.lastUpdated' => ['$eq' => null]];
+        if (!isset($this->params->domains) || !is_array($this->params->domains))
+            throw new Exception("No Domains to pull.");
 
-        if (!isset($this->domains))
-            $this->domains = Domain::findMulti($this->params->query);
+        $this->params->domains = array_map("core\\Format::domain", $this->params->domains);
+
+        $this->domains = Domain::findMulti(['name' => ['$in' => array_values($this->params->domains)]]);
 
         foreach ($this->domains as $domain) {
 
@@ -34,6 +38,7 @@ class Scrape extends \core\Job {
             $this->parseHomepage($domain);
 
             try {
+                $domain->scrape->dateModified = time();
                 $domain->update([
                     'resolvedUrl'  => $domain->resolvedUrl,
                     'scrape'       => $domain->scrape,

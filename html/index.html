@@ -30,6 +30,12 @@
                     <span class="pull-left">PruneJuice</span>
                 </a>
             </div>
+
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav navbar-left hidden-xs">
+                    <li v-for="module in modules" :class="{active: isActive(module)}"><a :href="module.href" v-text="module.title"></a></li>
+                </ul>
+            </div>
         </div>
     </nav>
 
@@ -40,8 +46,8 @@
                 <div class="hidden-sm hidden-md hidden-lg" style="height: 120px;"></div>
 
                 <ul class="nav nav-sidebar nav-sidebar-content">
-                    <li :class="{active: link.active}" v-for="link in links">
-                        <a class="index-anchor" :href="link.href"><i class="fa fa-book"></i> <span v-text="link.title"></span></a>
+                    <li :class="{active: isActive(link)}" v-for="(title, link) in activeLinks()">
+                        <a class="index-anchor" :href="link"><i class="fa fa-book"></i> <span v-text="title"></span></a>
                     </li>
                 </ul>
 

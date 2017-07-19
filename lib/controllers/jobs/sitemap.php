@@ -14,16 +14,20 @@ use models\Domain;
  */
 class Sitemap extends \core\Job {
 
+    /** @var Domain[] */
+    private $domains;
+
     /**
      * Main work function
      */
     protected function doWork() {
 
-        if (!isset($this->params->query))
-            $this->params->query = ['sitemap.lastmod' => ['$eq' => null]];
+        if (!isset($this->params->domains) || !is_array($this->params->domains))
+            throw new Exception("No Domains to pull.");
 
-        if (!isset($this->domains))
-            $this->domains = Domain::findMulti($this->params->query);
+        $this->params->domains = array_map("core\\Format::domain", $this->params->domains);
+
+        $this->domains = Domain::findMulti(['name' => ['$in' => array_values($this->params->domains)]]);
 
         foreach ($this->domains as $domain) {
 
@@ -32,6 +36,7 @@ class Sitemap extends \core\Job {
             $this->parseSitemaps($domain);
 
             try {
+                $domain->sitemap->dateModified = time();
                 $domain->update([
                     'sitemap'      => $domain->sitemap,
                     'dateModified' => $domain->dateModified,

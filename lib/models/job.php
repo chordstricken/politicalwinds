@@ -17,6 +17,7 @@ class Job extends core\Model {
     public $params;
     public $startTime;
     public $endTime;
+    public $scheduledTime;
     public $elapsed;
     public $status;
     public $dateAdded;

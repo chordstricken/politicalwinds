@@ -35,7 +35,7 @@ class Domain extends core\Model {
      */
     public function validate() {
         if (mb_strlen($this->id) > 1024) throw new Exception('Invalid id', 400);
-        if (mb_strlen($this->name) > 1024) throw new Exception('Invalid name', 400);
+        if (mb_strlen($this->name) > 1024 || !mb_strlen($this->name)) throw new Exception('Invalid name', 400);
 
         return $this;
     }

@@ -1,0 +1,49 @@
+<div>
+
+    <h1>Job List</h1>
+
+    <div class="row">
+        <div class="col-xs-6 col-sm-3">
+            <div class="btn btn-info btn-full" @click="search({status:'queued'})" v-text="counts.queued + ' Queued'"></div>
+        </div>
+        <div class="col-xs-6 col-sm-3">
+            <div class="btn btn-warning btn-full" @click="search({status:'in_progress'})" v-text="counts.in_progress + ' In Progress'"></div>
+        </div>
+        <div class="col-xs-6 col-sm-3">
+            <div class="btn btn-success btn-full" @click="search({status:'complete'})" v-text="counts.complete + ' Complete'"></div>
+        </div>
+        <div class="col-xs-6 col-sm-3">
+            <div class="btn btn-danger btn-full" @click="search({status:'failed'})" v-text="counts.failed + ' Failed'"></div>
+        </div>
+    </div>
+
+    <table class="table table-bordered card">
+        <thead>
+        <tr>
+            <th width="90">Job</th>
+            <th width="120">Status</th>
+            <th width="*">Params</th>
+            <th width="170">Start Time</th>
+            <th width="90">Elapsed</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="job in jobs" :href="'#/jobs/v/' + job.id">
+            <td v-text="job.name.split('\\').pop()"></td>
+            <td v-html="getStatusLabel(job.status)"></td>
+            <td v-text="job.params"></td>
+            <td v-text="getDateTime(job.startTime)"></td>
+            <td v-text="timeFormat(job.elapsed)"></td>
+        </tr>
+        </tbody>
+
+    </table>
+
+</div>
+<style>
+    td {
+        max-height: 4rem;
+        text-overflow: ellipsis;
+        word-wrap: break-word;
+    }
+</style>

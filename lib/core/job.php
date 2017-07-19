@@ -37,12 +37,22 @@ abstract class Job {
     }
 
     /**
+     * @param models\Job $job
+     */
+    public function setJob(models\Job $job) {
+        $this->params = $job->params;
+        $this->job    = $job;
+    }
+
+    /**
      * Runs the job
      */
     public function run() {
         Debug::info("Starting Job {$this->job->name}");
 
         try {
+            $this->job->startTime = time();
+            $this->job->save();
             $this->doWork();
             $this->job->status = 'complete';
 

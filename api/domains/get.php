@@ -12,7 +12,7 @@ use models\Domain;
 if (!isset($_REQUEST['name']))
     Response::init('Please provide a name', 400)->send();
 
-if ($domain = Domain::findOne(['name' => $_REQUEST['name']]))
-    Response::init($domain)->send();
+if ($result = Domain::findOne(['name' => $_REQUEST['name']]))
+    Response::init($result)->send();
 
 Response::init("Domain not found", 404);

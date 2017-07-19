@@ -1,0 +1,13 @@
+{
+    "name": "root/prunejuice",
+    "description": "Link Juice Parser & Lead Generator",
+    "require": {
+        "paquettg/php-html-parser": "^1.7"
+    },
+    "authors": [
+        {
+            "name": "Jason Wright",
+            "email": "jason@blackmast.org"
+        }
+    ]
+}

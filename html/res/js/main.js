@@ -2,20 +2,23 @@ var _vueHtml, _vueObj;
 
 
 var routes = {
-    '/jobs/:jobId': function(jobId) {
+    '/jobs/v/:jobId': function(jobId) {
         loadModule('jobs/single', {jobId: jobId});
     },
     '/jobs': function() {
-        loadModule('jobs/list');
+        loadModule('jobs/dashboard');
     },
-    '/domains/:domainId': function(domainName) {
+    '/domains/new': function() {
+        loadModule('domains/new');
+    },
+    '/domains/v/:domainId': function(domainName) {
         loadModule('domains/single', {domainName: domainName});
     },
     '/domains': function() {
         loadModule('domains/list');
     },
     '/': function() {
-        loadModule('domains/list');
+        location.hash = '#/domains';
     }
 };
 
@@ -24,6 +27,62 @@ var routes = {
  */
 var router = new Router(routes);
 router.init();
+
+
+/**
+ * Globally loaded NavBar
+ * @type {Vue}
+ */
+var NavBar = new Vue({
+    el: '#vue-nav-bar',
+    data: {
+        modules: {
+            domains: {
+                title: 'Domains',
+                href: '#/domains',
+            },
+            jobs: {
+                title: 'Jobs',
+                href: '#/jobs',
+            },
+        }
+    },
+    methods: {
+        isActive: function(module) {
+            return location.hash.indexOf(module.href) === 0;
+        },
+    },
+});
+
+/**
+ * Globally loaded Sidebar
+ * @type {Vue}
+ */
+var SideBar = new Vue({
+    el: '#vue-sidebar',
+    data: {
+        links: {
+            domains: {
+                '#/domains': 'List Domains',
+                '#/domains/new': 'New Domain',
+            },
+            jobs: {
+                '#/jobs': 'Jobs Dashboard',
+                '#/jobs/schedule': 'Schedule Job',
+            }
+        },
+    },
+    methods: {
+        activeLinks: function() {
+            var module = location.hash.replace(/^\#\//, '').split('/')[0];
+            return this.links[module] || {};
+        },
+        isActive: function(link) {
+            return link === location.hash;
+        }
+    }
+});
+
 
 /**
  * Clears the page and puts in a 'not found' alert
@@ -48,7 +107,7 @@ function loadModule(module, params) {
         // don't cache this selector. Creating a new Vue instance clones it and the ref becomes stale.
         $('#vue-app').html(_vueHtml);
 
-        console.log('loadModule', module, (params || {}));
+        // console.log('loadModule', module, (params || {}));
         _vueObj.data.params = params || {};
         _vueObj.el = '#vue-app';
 
@@ -57,8 +116,8 @@ function loadModule(module, params) {
 
         window.App = new Vue(_vueObj);
 
-        var moduleParts = module.split('/');
-        window.SideBar.setActive(moduleParts[0]);
+        NavBar.$forceUpdate();
+        SideBar.$forceUpdate();
     }
 
     $.get({
@@ -76,42 +135,3 @@ function loadModule(module, params) {
         done();
     });
 }
-
-/**
- * Globally loaded NavBar
- * @type {Vue}
- */
-var NavBar = new Vue({
-    el: '#vue-nav-bar'
-});
-
-/**
- * Globally loaded Sidebar
- * @type {Vue}
- */
-var SideBar = new Vue({
-    el: '#vue-sidebar',
-    data: {
-        links: {
-            domains: {
-                title: 'Domains',
-                href: '#/',
-                active: false,
-            },
-            jobs: {
-                title: 'Jobs',
-                href: '#/jobs',
-                active: false,
-            }
-        },
-    },
-    methods: {
-        setActive: function(module) {
-            for (var i in this.links)
-                this.links[i].active = false;
-
-            if (this.links[module])
-                this.links[module].active = true;
-        }
-    }
-});

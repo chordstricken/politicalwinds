@@ -161,6 +161,9 @@ a, a:hover {
     font-size: 24px;
     padding: 10px 15px;
 }
+.btn-full {
+    width: 100%;
+}
 
 .input-group-addon {
     color: #b4bcc2;

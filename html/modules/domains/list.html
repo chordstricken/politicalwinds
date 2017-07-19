@@ -1,0 +1,31 @@
+<div>
+
+    <h1>Domain List</h1>
+
+    <form @submit.prevent="search">
+        <input type="search" class="form-control" v-model="searchQuery" placeholder='{"name": "goivio.com"}'>
+    </form>
+
+    <table class="table table-bordered card">
+        <thead>
+        <tr>
+            <th>Domain</th>
+            <th>DA</th>
+            <th>&copy;</th>
+            <th>Last Visible Date</th>
+            <th>Last Sitemap Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="domain in domains" :href="'#/domains/v/' + domain.name">
+            <td v-text="domain.name"></td>
+            <td v-text="numberFormat(domain.moz.domainAuthority, 4)"></td>
+            <td v-text="domain.scrape.copyright"></td>
+            <td v-text="getDateTime(domain.scrape.lastUpdate)"></td>
+            <td v-text="getDateTime(domain.sitemap.lastmod)"></td>
+        </tr>
+        </tbody>
+
+    </table>
+
+</div>

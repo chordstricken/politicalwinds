@@ -1,25 +1,41 @@
 var _vueObj = {
     data: {
         params: {},
-        error: false,
+        alert: {},
         domain: {},
     },
     created: function() {
         var scope = this;
-        console.log(scope);
         $.get({
             dataType: 'json',
             url: '/api/domains/get?name=' + scope.params.domainName,
             success: function(result) {
-                scope.error  = false;
+                scope.alert  = {};
                 scope.domain = result;
             },
             error: function(jqXHR) {
-                scope.error = jqXHR.responseText;
+                scope.alert = {error: jqXHR.responseText};
             },
         });
     },
     methods: {
-
+        schedule: function(jobType) {
+            var scope = this;
+            $.post({
+                url: '/api/jobs/schedule',
+                data: {
+                    type: jobType,
+                    params: {
+                        domains: [scope.domain.name]
+                    }
+                },
+                success: function(result) {
+                    scope.alert = {success: "Successfully scheduled the job."};
+                },
+                error: function(jqXHR) {
+                    scope.alert = {error: jqXHR.responseText};
+                },
+            });
+        }
     },
 };

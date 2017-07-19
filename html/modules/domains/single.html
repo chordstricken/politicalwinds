@@ -1,8 +1,19 @@
 <div>
-    <div class="alert alert-danger" v-if="error" v-html="error"></div>
+    <div class="alert alert-danger" v-if="alert.error" v-html="alert.error"></div>
+    <div class="alert alert-success" v-if="alert.success" v-html="alert.success"></div>
+
 
     <h1><a :href="domain.resolvedUrl" v-text="domain.name" target="_blank"></a></h1>
     <hr>
+
+    <div>
+        <h3>Schedule a Job</h3>
+        <div>
+            <span class="btn btn-info" @click="schedule('Scrape')">Scrape</span>
+            <span class="btn btn-info" @click="schedule('Sitemap')">Sitemap</span>
+            <span class="btn btn-info" @click="schedule('SEOMoz')">SEOMoz</span>
+        </div>
+    </div>
 
     <pre class="card" v-text="domain"></pre>
 </div>

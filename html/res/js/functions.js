@@ -21,6 +21,9 @@ function numberFormat(num, precision) {
 
 function timeFormat(seconds) {
     var res = '';
+    if (!seconds)
+        return 'N/A';
+
     if (seconds >= 86400) {
         var days = Math.floor(seconds / 86400);
         seconds -= 86400 * days;
