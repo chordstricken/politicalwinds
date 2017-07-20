@@ -1,0 +1,46 @@
+<div>
+    <section class="container-fluid container--form">
+
+        <div class="row">
+            <div class="col-sm-8 col-sm-offset-2">
+                <form class="form-inline" @submit.prevent="search">
+                    <input class="form-control" type="text" v-model="query" placeholder="Search for a politician">
+                    <button class="btn btn-primary">Search</button>
+                </form>
+            </div>
+        </div>
+
+    </section>
+
+    <section class="container container--results">
+        <Loader :isbusy="isbusy"></Loader>
+
+        <hr>
+
+        <div class="row" v-if="resultCount > 0">
+            <div class="col-md-4 col-sm-6 col-xs-12" v-for="(member, id) in results">
+
+                <a class="index-card media" :href="'#/member/' + id">
+                    <div class="media-left">
+                        <div class="headshot">
+                            <object :data="getMemberHeadshot(member)" type="image/jpg">
+                                <img src="img/headshot-default.svg">
+                            </object>
+                        </div>
+                    </div>
+                    <div class="media-body">
+                        <h4 class="media-heading" v-text="member.name.official_full"></h4>
+                        <div class="media">
+                            This is some data
+                        </div>
+                    </div>
+                </a>
+
+            </div>
+        </div>
+        <div class="text-center" v-if="resultCount == 0">
+            <em>No results found.</em>
+        </div>
+
+    </section>
+</div>
