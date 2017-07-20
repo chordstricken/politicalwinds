@@ -1,10 +1,12 @@
 <?php
+
 namespace core;
 
 use \Exception;
 use MongoDB\Driver\BulkWrite;
 use MongoDB\Driver\Query;
 use MongoDB\Driver\Command;
+use MongoDB\BSON;
 
 /**
  * @author Jason Wright <jason@silvermast.io>
@@ -20,6 +22,9 @@ abstract class Model {
 
     /** @var mixed */
     protected static $_indexes;
+
+    public $dateAdded;
+    public $dateModified;
 
     /**
      * Base constructor.
@@ -54,6 +59,8 @@ abstract class Model {
      */
     public function save() {
         try {
+            $this->dateAdded    = $this->dateAdded ?? time();
+            $this->dateModified = time();
 
             // create a new transaction batch
             $bulkWrite = new BulkWrite();
@@ -89,6 +96,8 @@ abstract class Model {
     /**
      * Updates only specified fields on an object
      * @param array $set
+     * @return static
+     * @throws Exception
      */
     public function update($set) {
         try {
@@ -98,6 +107,8 @@ abstract class Model {
             if (empty($this->{static::ID}))
                 throw new Exception("ID is not set. " . json_encode($this));
 
+            $set                 = (array)$set;
+            $set['dateModified'] = time();
             $bulkWrite->update([static::ID => $this->{static::ID}], ['$set' => $set]);
 
             // commit the changes
@@ -125,6 +136,7 @@ abstract class Model {
         } catch (Exception $e) {
 
         }
+
         return $this;
     }
 
@@ -138,6 +150,7 @@ abstract class Model {
         $id    = '';
         for ($i = 0; $i < 16; $i++)
             $id .= $chars[mt_rand(0, $len)];
+
         return $id;
     }
 
@@ -150,8 +163,9 @@ abstract class Model {
     public static function findOne($query, $queryOptions = []) {
         try {
             $queryOptions['limit'] = 1;
-            $dbQuery = new Query($query, $queryOptions);
-            $cursor = self::_db()->executeQuery(static::getDBNamespace(), $dbQuery)->toArray();
+            $dbQuery               = new Query($query, $queryOptions);
+            $cursor                = self::_db()->executeQuery(static::getDBNamespace(), $dbQuery)->toArray();
+
             return current($cursor) ? static::new(current($cursor)) : null;
 
         } catch (Exception $e) {
@@ -170,8 +184,9 @@ abstract class Model {
     public static function findMulti($query, $queryOptions = []) {
         $objects = [];
         try {
+            Debug::info(__METHOD__ . ' ' . json_encode($query));
             $dbQuery = new Query($query, $queryOptions);
-            $result = self::_db()->executeQuery(static::getDBNamespace(), $dbQuery);
+            $result  = self::_db()->executeQuery(static::getDBNamespace(), $dbQuery);
 
             foreach ($result as $row)
                 $objects[$row->{static::ID}] = static::new($row);
@@ -179,34 +194,111 @@ abstract class Model {
         } catch (Exception $e) {
             Debug::error($query);
         }
+
         return $objects;
+    }
+
+    /**
+     * Returns an array of objects (in memory)
+     * @param $query
+     * @param array $queryOptions
+     * @return mixed
+     */
+    public static function group($query) {
+        $objects = [];
+        try {
+
+            if (!isset($query['initial']))
+                $query['initial'] = (object)[];
+
+            $cmd    = ['ns' => static::TABLE] + $query;
+            $dbCmd  = new Command(['group' => $cmd]);
+            $result = self::_db()->executeCommand(static::$dbName, $dbCmd)->toArray();
+
+            return reset($result)->retval;
+
+        } catch (Exception $e) {
+            Debug::error(['msg' => $e->getMessage(), 'query' => $query]);
+        }
+
+        return $objects;
+    }
+
+    /**
+     * Returns an array of objects (in memory)
+     * @param $query
+     * @param array $queryOptions
+     * @return mixed
+     */
+    public static function aggregate($query) {
+        $objects = [];
+        try {
+
+            $dbCmd = new Command([
+                'aggregate' => static::TABLE,
+                'pipeline'  => $query,
+                //                'cursor' => new \stdClass,
+            ]);
+
+            $result = self::_db()->executeCommand(static::$dbName, $dbCmd);
+
+            return $result->toArray();
+
+        } catch (Exception $e) {
+            Debug::error(['msg' => $e->getMessage(), 'query' => $query]);
+        }
+
+        return $objects;
+    }
+
+    /**
+     * Returns an array of distinct values
+     * @param $field
+     * @return array
+     */
+    public static function distinct($field) {
+
+        $results = [];
+        try {
+
+            $dbCmd  = new Command([
+                'distinct' => static::TABLE,
+                'key'      => $field,
+            ]);
+            $result = self::_db()->executeCommand(static::$dbName, $dbCmd)->toArray();
+
+            return reset($result)->values;
+
+        } catch (Exception $e) {
+            Debug::error($e->getMessage());
+        }
+
+        return $results;
     }
 
     /**
      * Returns the number of objects matching the query
      * @param $query
-     * @param array $queryOptions
-     * @return int
+     * @return int|false
      */
-    public static function count($query, $queryOptions = []) {
-        $count = 0;
+    public static function count($query = []) {
         try {
-            $dbQuery = new Query($query, $queryOptions);
-            $result = self::_db()->executeQuery(static::getDBNamespace(), $dbQuery);
+            $dbCmd  = new Command(['count' => static::TABLE, 'query' => $query]);
+            $result = self::_db()->executeCommand(static::$dbName, $dbCmd);
 
-            foreach ($result as $row)
-                $count++;
+            return $result->toArray()[0]->n;
 
         } catch (Exception $e) {
-            Debug::error($query);
+            Debug::error($e->getMessage());
         }
-        return $count;
+
+        return false;
     }
 
     /**
      * Deletes objects from the table
      * @param $query
-     * @return $this
+     * @return int|false
      * @throws Exception
      */
     public static function deleteQuery(array $query) {
@@ -216,10 +308,14 @@ abstract class Model {
         try {
             $bulkWrite = new BulkWrite();
             $bulkWrite->delete($query);
-            self::_db()->executeBulkWrite(static::getDBNamespace(), $bulkWrite);
+            $result = self::_db()->executeBulkWrite(static::getDBNamespace(), $bulkWrite);
+
+            return $result->getDeletedCount();
 
         } catch (Exception $e) {
             Debug::error($e->getMessage());
+
+            return false;
         }
     }
 

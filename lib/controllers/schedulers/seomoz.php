@@ -67,7 +67,7 @@ class SEOMoz extends core\Scheduler {
     private function getPendingDomains() {
         $jobs = models\Job::findMulti([
             'name' => self::$jobType,
-            ['status' => ['$in' => ['queued', 'in_progress']]],
+            'status' => ['$in' => ['queued', 'in_progress']],
         ]);
 
         $domains = [];

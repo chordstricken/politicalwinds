@@ -1,4 +1,5 @@
 var _vueHtml, _vueObj;
+if (!location.hash) location.href = "/#/";
 
 
 var routes = {

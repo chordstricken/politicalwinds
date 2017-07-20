@@ -46,16 +46,16 @@ class Sitemap extends core\Scheduler {
         if (count($domains)) {
             // remove pending domains from the new job array
             $domains = array_diff($domains, $this->getPendingDomains());
-            $job     = new models\Job([
-                'name'          => self::$jobType,
-                'params'        => ['domains' => $domains],
-                'status'        => 'queued',
-                'scheduledTime' => time(),
-                'dateAdded'     => time(),
-                'dateModified'  => time(),
-            ]);
+            foreach ($domains as $domain) {
+                $job = new models\Job([
+                    'name'          => self::$jobType,
+                    'params'        => ['domains' => [$domain]],
+                    'status'        => 'queued',
+                    'scheduledTime' => time(),
+                ]);
 
-            $job->save();
+                $job->save();
+            }
         }
     }
 
@@ -66,7 +66,7 @@ class Sitemap extends core\Scheduler {
     private function getPendingDomains() {
         $jobs = models\Job::findMulti([
             'name' => self::$jobType,
-            ['status' => ['$in' => ['queued', 'in_progress']]],
+            'status' => ['$in' => ['queued', 'in_progress']],
         ]);
 
         $domains = [];

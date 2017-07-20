@@ -37,7 +37,6 @@ class Scrape extends core\Scheduler {
             ], ['skip' => $offset]);
 
             foreach ($results as $domain) {
-                Debug::info(__METHOD__ . " Adding domain $domain->name");
                 $domains[] = $domain->name;
             }
 
@@ -47,17 +46,19 @@ class Scrape extends core\Scheduler {
 
         if (count($domains)) {
             // remove pending domains from the new job array
-            $domains = array_diff($domains, $this->getPendingDomains());
-            $job     = new models\Job([
-                'name'          => self::$jobType,
-                'params'        => ['domains' => $domains],
-                'status'        => 'queued',
-                'scheduledTime' => time(),
-                'dateAdded'     => time(),
-                'dateModified'  => time(),
-            ]);
+            $domains = array_diff($domains, $this->getPendingDomains()) ?? [];
 
-            $job->save();
+            foreach ($domains as $domain) {
+                Debug::info(__METHOD__ . " Adding domain $domain");
+                $job = new models\Job([
+                    'name'          => self::$jobType,
+                    'params'        => ['domains' => [$domain]],
+                    'status'        => 'queued',
+                    'scheduledTime' => time(),
+                ]);
+
+                $job->save();
+            }
         }
     }
 
@@ -68,12 +69,12 @@ class Scrape extends core\Scheduler {
     private function getPendingDomains() {
         $jobs = models\Job::findMulti([
             'name' => self::$jobType,
-            ['status' => ['$in' => ['queued', 'in_progress']]],
+            'status' => ['$in' => ['queued', 'in_progress']],
         ]);
 
         $domains = [];
         foreach ($jobs as $job)
-            if (isset($job->params->domains))
+            if (isset($job->params->domains) && is_array($job->params->domains))
                 $domains = array_combine($domains, $job->params->domains);
 
         return array_unique($domains);

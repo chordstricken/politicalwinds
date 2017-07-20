@@ -25,10 +25,6 @@ class Domain extends core\Model {
     /** @var \stdClass */
     public $sitemap;
 
-
-    public $dateModified;
-    public $dateAdded;
-
     /**
      * @return $this
      * @throws Exception
@@ -38,6 +34,26 @@ class Domain extends core\Model {
         if (mb_strlen($this->name) > 1024 || !mb_strlen($this->name)) throw new Exception('Invalid name', 400);
 
         return $this;
+    }
+
+    /**
+     * Adds an array of domains to the database
+     * @param Domain[]
+     */
+    public static function addMulti(array $domainNames) {
+        $domainNames = array_values(array_map('core\\Format::domain', $domainNames));
+        $existingDomains = [];
+        foreach (self::findMulti(['name' => ['$in' => $domainNames]]) as $domain)
+            $existingDomains[] = $domain->name;
+
+        $newDomains = array_diff($domainNames, $existingDomains);
+        $newDomains = array_filter($newDomains, 'trim');
+
+        core\Debug::info(__METHOD__ . ' Adding ' . count($newDomains) . ' domains');
+
+        foreach ($newDomains as $newDomainName) {
+            self::new(['name' => $newDomainName])->save();
+        }
     }
 
 }

@@ -3,18 +3,16 @@
     <h1>Job List</h1>
 
     <div class="row">
-        <div class="col-xs-6 col-sm-3">
-            <div class="btn btn-info btn-full" @click="search({status:'queued'})" v-text="counts.queued + ' Queued'"></div>
+        <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2" v-for="(jobStatuses, jobName) in counts">
+            <div class="card">
+                <h3 v-text="jobName"></h3>
+                <div><a class="h4 text-info" @click="search({name: 'controllers\\jobs\\' + jobName, status:'queued'})" v-text="jobStatuses.queued + ' Queued'"></a></div>
+                <div><a class="h4 text-warning" @click="search({name: 'controllers\\jobs\\' + jobName, status:'in_progress'})" v-text="jobStatuses.in_progress + ' In Progress'"></a></div>
+                <div><a class="h4 text-danger" @click="search({name: 'controllers\\jobs\\' + jobName, status:'failed'})" v-text="jobStatuses.failed + ' Failed'"></a></div>
+                <div><a class="h4 text-success" @click="search({name: 'controllers\\jobs\\' + jobName, status:'complete'})" v-text="jobStatuses.complete + ' Complete'"></a></div>
+            </div>
         </div>
-        <div class="col-xs-6 col-sm-3">
-            <div class="btn btn-warning btn-full" @click="search({status:'in_progress'})" v-text="counts.in_progress + ' In Progress'"></div>
-        </div>
-        <div class="col-xs-6 col-sm-3">
-            <div class="btn btn-success btn-full" @click="search({status:'complete'})" v-text="counts.complete + ' Complete'"></div>
-        </div>
-        <div class="col-xs-6 col-sm-3">
-            <div class="btn btn-danger btn-full" @click="search({status:'failed'})" v-text="counts.failed + ' Failed'"></div>
-        </div>
+
     </div>
 
     <table class="table table-bordered card">

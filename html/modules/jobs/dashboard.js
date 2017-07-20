@@ -1,37 +1,38 @@
 var _vueObj = {
     data: {
-        counts: {
-            queued: 0,
-            in_progress: 0,
-            complete: 0,
-            failed: 0,
-        },
+        counts: {},
         jobs: {},
     },
     created: function() {
         var scope = this;
         scope.search({status: 'queued'});
+
         scope.getCounts();
+        setInterval(scope.getCounts, 5000);
     },
     methods: {
         getCounts: function() {
             var countType,
                 scope = this;
 
-            var types = Object.keys(scope.counts);
+            $.getJSON('/api/jobs/dashboard-counts', function(result) {
+                var newCounts = {};
+                for (var i in result) {
+                    var jobName = result[i].name.split('\\').pop();
 
-            function getCount(type) {
-                var queryString = JSON.stringify({status: type});
-                $.get({
-                    url: '/api/jobs/count',
-                    data: {query: queryString},
-                    success: function(count) {
-                        scope.counts[type] = count;
-                    }
-                });
-            }
+                    if (!newCounts[jobName])
+                        newCounts[jobName] = {
+                            queued: 0,
+                            in_progress: 0,
+                            complete: 0,
+                            failed: 0,
+                        };
 
-            types.map(getCount);
+                    newCounts[jobName][result[i].status] = result[i].total;
+                }
+                scope.counts = newCounts;
+            });
+
         },
         getStatusLabel: function(status) {
             switch (status) {

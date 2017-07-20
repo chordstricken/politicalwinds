@@ -39,6 +39,16 @@ class CURL {
     }
 
     /**
+     * @param array $postdata
+     * @return mixed
+     */
+    public function post($postdata = []) {
+        $this->setOpt(CURLOPT_POST, true);
+        $this->setOpt(CURLOPT_POSTFIELDS, $postdata);
+        return $this->exec();
+    }
+
+    /**
      * @return mixed
      */
     public function exec() {
