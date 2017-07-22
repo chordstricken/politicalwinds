@@ -15,9 +15,29 @@ var _vueObj = {
         }
     },
     methods: {
+        /** Member Index Object **/
         getMemberHeadshot: function(member) {
-            return '/api/members/photos/' + member.id.bioguide[0] + '/' + member.id.bioguide + '.jpg';
-            // return 'background-image: url(img/headshot-default.svg), url("' + headshot + '");'
+            return '/api/static/members/photos/' + member.id[0] + '/' + member.id + '.jpg';
+        },
+
+        getOfficeLabel: function(office) {
+            switch (office) {
+                case 'rep': return 'Representative';
+                case 'sen': return 'Senator';
+                case 'prez': return 'President';
+                case 'viceprez': return 'Vice President';
+                default: return office;
+            }
+        },
+
+        getPartyLabel: function(party) {
+            switch (party.toLowerCase()) {
+                case 'democrat': return '<span class="label label-primary">Dem</span>';
+                case 'republican': return '<span class="label label-danger">Rep</span>';
+                case 'libertarian': return '<span class="label label-warning">Lib</span>';
+                case 'independent': return '<span class="label label-default">Ind</span>';
+                default: return '<span class="label label-default">' + party + '</span>';
+            }
         },
 
         search_show_results: function() {
@@ -29,10 +49,11 @@ var _vueObj = {
             for (i in scope._index) {
                 var member = scope._index[i];
 
-                if (member.name && member.name.official_full && member.name.official_full.match(rexpQuery))
-                    scope.results[i] = member;
-                else if (i.match(rexpQuery))
-                    scope.results[i] = member;
+                var isMatch = i.match(rexpQuery);
+                isMatch = isMatch || member.name && member.name.match(rexpQuery);
+                isMatch = isMatch || member.state && member.state.match(rexpQuery) || stateFull(member.state).match(rexpQuery);
+
+                if (isMatch) scope.results[i] = member;
 
             }
 
@@ -42,7 +63,7 @@ var _vueObj = {
             var scope = this;
             if (!scope._index) {
                 scope.isbusy = true;
-                $.get('/api/us/current.json', function(result) {
+                $.get('/api/static/us/congress.json', function(result) {
                     scope._index = result instanceof Object ? result : JSON.parse(result);
                     scope.search_show_results();
                 });

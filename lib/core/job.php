@@ -66,7 +66,8 @@ abstract class Job {
         $this->job->elapsed = $this->job->endTime - $this->job->startTime;
         $this->job->save();
 
-        Debug::info("Finished Job {$this->job->name}");
+        $memory = number_format(memory_get_peak_usage() / 1024 / 1024, 4);
+        Debug::info("Finished Job {$this->job->name} after {$this->job->elapsed} s using $memory MB");
     }
 
     protected abstract function doWork();

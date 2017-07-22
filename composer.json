@@ -1,8 +1,9 @@
 {
-    "name": "root/prunejuice",
-    "description": "Link Juice Parser & Lead Generator",
+    "name": "root/politics",
+    "description": "Political Information App",
     "require": {
-        "paquettg/php-html-parser": "^1.7"
+        "paquettg/php-html-parser": "^1.7",
+        "symfony/yaml": "^3.3"
     },
     "authors": [
         {

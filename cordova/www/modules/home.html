@@ -1,4 +1,4 @@
-<div>
+<div id="vue-app">
     <section class="container-fluid container--form">
 
         <div class="row">
@@ -20,18 +20,25 @@
         <div class="row" v-if="resultCount > 0">
             <div class="col-md-4 col-sm-6 col-xs-12" v-for="(member, id) in results">
 
-                <a class="index-card media" :href="'#/member/' + id">
+                <a class="index-card media" :href="'#/member/v/' + id">
                     <div class="media-left">
                         <div class="headshot">
                             <object :data="getMemberHeadshot(member)" type="image/jpg">
-                                <img src="img/headshot-default.svg">
+                                <img src="res/img/headshot-default.svg">
                             </object>
                         </div>
                     </div>
                     <div class="media-body">
-                        <h4 class="media-heading" v-text="member.name.official_full"></h4>
+                        <h4 class="media-heading">
+                            <span v-text="member.name"></span>
+                            <small class="pull-right" v-if="member.party" v-html="getPartyLabelShort(member.party)"></small>
+                        </h4>
                         <div class="media">
-                            This is some data
+                            <div v-if="member.office" v-html="getOfficeLabel(member.office)"></div>
+                            <div v-if="member.state || member.district">
+                                <span v-if="member.state" v-text="stateFull(member.state)"></span>
+                                <span class="badge" v-if="member.district" v-text="'District ' + member.district"></span>
+                            </div>
                         </div>
                     </div>
                 </a>

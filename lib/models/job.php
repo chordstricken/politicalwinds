@@ -9,8 +9,7 @@ use \Exception;
  * @since 7/12/17
  */
 class Job extends core\Model {
-
-    const TABLE = 'jobs';
+    use core\db\Blackhole;
 
     public $id;
     public $name;

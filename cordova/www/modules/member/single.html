@@ -1,0 +1,111 @@
+<div id="vue-app">
+
+    <section class="container-fluid container--member-bio">
+        <div class="container">
+
+            <div class="info">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="headshot text-center">
+                            <object :data="getMemberHeadshot(member)" type="image/jpg">
+                                <img src="res/img/headshot-default.svg">
+                            </object>
+                        </div>
+                    </div>
+
+                    <div class="col-md-8">
+
+                        <h1 v-text="member.name.official_full"></h1>
+                        <div class="h2" v-if="currentTerm.party" v-html="getPartyLabelLong(currentTerm.party)"></div>
+                        <hr>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="term-info">
+                                    <h2>Current Term</h2>
+
+                                    <div class="h3" v-if="currentTerm.state || currentTerm.district">
+                                        <span v-if="currentTerm.state" v-text="stateFull(currentTerm.state)"></span>
+                                        <span v-if="currentTerm.type" v-html="getOfficeLabel(currentTerm.type)"></span>
+                                        <span v-if="currentTerm.district" v-text="'District ' + currentTerm.district" class="badge"></span>
+                                    </div>
+
+                                    <div v-if="currentTerm.start" class="row">
+                                        <small class="col-xs-7">Term Start:</small>
+                                        <small class="col-xs-5" v-text="getDatePretty(currentTerm.start)"></small>
+                                    </div>
+                                    <div v-if="currentTerm.end" class="row">
+                                        <small class="col-xs-7">Term End:</small>
+                                        <small class="col-xs-5" v-text="getDatePretty(currentTerm.end)"></small>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="office-info">
+                                    <h2>Contact</h2>
+
+                                    <a class="office-info-item phone" v-if="currentTerm.phone" :href="'tel:' + currentTerm.phone" target="_blank">
+                                        <i class="fa fa-phone"></i>
+                                        <span v-text="currentTerm.phone"></span>
+                                    </a>
+                                    <div class="office-info-item fax" v-if="currentTerm.fax">
+                                        <i class="fa fa-print"></i>
+                                        <span v-text="'Fax: ' + currentTerm.fax"></span>
+                                    </div>
+                                    <div class="office-info-item address" v-if="currentTerm.address">
+                                        <i class="fa fa-building"></i>
+                                        <span v-text="currentTerm.address"></span>
+                                    </div>
+                                    <a :href="currentTerm.url" class="office-info-item website" v-if="currentTerm.url">
+                                        <i class="fa fa-external-link"></i>
+                                        <span v-text="currentTerm.url"></span>
+                                    </a>
+
+                                    <div class="social-icons" v-if="member.social">
+                                        <a :href="'https://twitter.com/' + member.social.twitter" v-if="member.social.twitter" target="_blank"><i class="fa fa-twitter-square"></i></a>
+                                        <a :href="'https://facebook.com/' + member.social.facebook" v-if="member.social.facebook" target="_blank"><i class="fa fa-facebook-official"></i></a>
+                                        <a :href="'https://instagram.com/' + member.social.instagram" v-if="member.social.instagram" target="_blank"><i class="fa fa-instagram"></i></a>
+                                        <a :href="'https://youtube.com/user/' + member.social.youtube" v-if="member.social.youtube" target="_blank"><i class="fa fa-youtube-square"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <section class="container container--member-feed">
+
+        <h3>Terms</h3>
+        <ul class="list-group">
+            <li class="list-group-item" v-for="term in member.terms">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <span class="start-date" v-text="getDatePretty(term.start)"></span> to <span class="end-date" v-text="getDatePretty(term.end)"></span>
+                        <span class="pull-right" v-html="getPartyLabelShort(term.party)"></span>
+                    </div>
+                    <div class="col-sm-6">
+                        <span v-if="term.state" v-text="stateFull(term.state)"></span>
+                        <span v-if="term.type" v-html="getOfficeLabel(term.type)"></span>
+                        <span v-if="term.district" v-text="'District ' + term.district"></span>
+                    </div>
+                </div>
+            </li>
+        </ul>
+
+        <pre v-text="member"></pre>
+
+        <div class="text-center" v-if="!member || !member.id">
+            <em>404: Page Not Found.</em>
+        </div>
+
+    </section>
+</div>
