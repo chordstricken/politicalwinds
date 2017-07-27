@@ -96,3 +96,15 @@ body {
     word-wrap: break-word;
     word-break: break-all;
 }
+.list-group-item {
+    border-radius: 0;
+}
+.table {
+    background-color: #ffffff;
+}
+.table td, .table th {
+    padding: 1rem;
+}
+.table tr {
+    border: 1px solid #ddd;
+}

@@ -51,7 +51,7 @@ var _vueObj = {
 
                 var isMatch = i.match(rexpQuery);
                 isMatch = isMatch || member.name && member.name.match(rexpQuery);
-                isMatch = isMatch || member.state && member.state.match(rexpQuery) || stateFull(member.state).match(rexpQuery);
+                isMatch = isMatch || member.state && member.state.match(rexpQuery) || stateFull(member.state || '').match(rexpQuery);
 
                 if (isMatch) scope.results[i] = member;
 

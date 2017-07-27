@@ -7,19 +7,19 @@ use Symfony\Component\Yaml\Yaml;
 use \Exception;
 use core\CURL;
 use core\Debug;
-use models\Member;
+use models;
 
 /**
  * @author Jason Wright <jason.dee.wright@gmail.com>
  * @since 7/20/17
  * @package prunejuice
  */
-class importMembers extends \core\Job {
+class ImportMembers extends \core\Job {
 
-    /** @var Member[] */
+    /** @var models\Member[] */
     private $members = [];
 
-    /** @var Member[] */
+    /** @var models\Member[] */
     private $congressIndex = [];
 
     /**
@@ -28,11 +28,8 @@ class importMembers extends \core\Job {
     protected function doWork() {
         $this->getExecutive();
         $this->getCongress();
-//        $this->getCongressHistory();
-
         $this->getSocialMedia();
         $this->getCommittees();
-        $this->getCommitteeMemberships();
 
         foreach ($this->members as $member)
             $member->save();
@@ -57,7 +54,7 @@ class importMembers extends \core\Job {
         if (!is_dir($cacheDir))
             mkdir($cacheDir, 0777, true);
 
-        if (file_exists("$cacheDir/$path")) {
+        if (file_exists("$cacheDir/$path") && filemtime("$cacheDir/$path") > strtotime('-1 day')) {
             Debug::info("Cache Hit $path");
             return Yaml::parse(file_get_contents("$cacheDir/$path"), Yaml::PARSE_OBJECT_FOR_MAP);
         } else {
@@ -76,17 +73,17 @@ class importMembers extends \core\Job {
     /**
      * Adds a member to the array
      * @param $memberRow
-     * @return Member
+     * @return models\Member
      */
     private function addMember($data) {
-        $id = $data->id->bioguide;
+        $id = $data->id->bioguide ?? $data->id->govtrack;
 
         // rename 'id' to 'appIds'
         $data->appIds = (object)$data->id;
         $data->id = $id;
 
         if (!isset($this->members[$id]))
-            $this->members[$id] = new Member($data);
+            $this->members[$id] = new models\Member($data);
         else
             $this->members[$id]->setVars($data);
 
@@ -94,17 +91,21 @@ class importMembers extends \core\Job {
     }
 
     /**
-     * Pulls YAML data from github
+     * Pulls YAML data from theunitedstates.io
      */
     private function getExecutive() {
         Debug::info(__METHOD__ . ': Getting Data');
 
         $data = $this->getData('executive.yaml');
-        array_map([$this, 'addMember'], $data);
+        foreach ($data as $row) {
+            $member = $this->addMember($row);
+            if ($member->isInOffice())
+                $this->congressIndex[$member->id] = null;
+        }
     }
 
     /**
-     * Pulls YAML data from github
+     * Pulls YAML data from theunitedstates.io
      */
     private function getCongress() {
         Debug::info(__METHOD__ . ': Getting Data');
@@ -115,11 +116,10 @@ class importMembers extends \core\Job {
             $this->congressIndex[$member->id] = null;
         }
 
-        print_r(array_keys($this->congressIndex));
     }
 
     /**
-     * Pulls YAML data from github
+     * Pulls YAML data from theunitedstates.io
      */
     private function getCongressHistory() {
         Debug::info(__METHOD__ . ': Getting Data');
@@ -129,7 +129,7 @@ class importMembers extends \core\Job {
     }
 
     /**
-     * Pulls YAML data from github
+     * Pulls YAML data from theunitedstates.io
      */
     private function getSocialMedia() {
         Debug::info(__METHOD__ . ': Getting Data');
@@ -138,12 +138,71 @@ class importMembers extends \core\Job {
         array_map([$this, 'addMember'], $data);
     }
 
+    /**
+     * Pulls YAML data from theunitedstates.io and saves it
+     */
     private function getCommittees() {
-        // committees-current
-    }
+        Debug::info(__METHOD__ . ': Getting Data');
 
-    private function getCommitteeMemberships() {
-        // committee-membership-current
+        $cData  = $this->getData('committees-current.yaml');
+        $cmData = $this->getData('committee-membership-current.yaml');
+        $committees = [];
+
+        foreach ($cData as $row) {
+            $row->id = $row->thomas_id;
+
+            // if there are subs, index by thomas_id
+            if (isset($row->subcommittees)) {
+                $subs = [];
+                foreach ($row->subcommittees as $sub)
+                    $subs[$sub->thomas_id] = $sub;
+
+                $row->subcommittees = $subs;
+            }
+
+
+            $committees[$row->id] = new models\Committee((array)$row);
+        }
+
+        foreach ($cmData as $cIdFull => $cMembers) {
+            $scId = null; // assume not a subcommittee
+            $cId  = $cIdFull;
+
+            // break apart subcommittee if it exists
+            if (strlen($cIdFull) > 4)
+                list($cId, $scId) = [substr($cIdFull, 0, 4), substr($cIdFull, 4)];
+
+            if (!isset($committees[$cId]) && !isset($committees[$cIdFull])) {
+                Debug::info("Committee $cIdFull not found.");
+                continue;
+            }
+
+            if (!is_array($committees[$cId]->members))
+                $committees[$cId]->members = [];
+
+            foreach ($cMembers as $mData) {
+                $mId = $mData->bioguide;
+
+                // store member in the committee
+                $committees[$cId]->members[$mId] = $mData->name;
+
+                if (!isset($this->members[$mId])) {
+                    Debug::info(__METHOD__ . " member $mId not found");
+                    continue;
+                }
+
+                // store committee in member
+                if (!is_array($this->members[$mId]->committees))
+                    $this->members[$mId]->committees = [];
+
+                $this->members[$mId]->committees[$cIdFull] = $committees[$cId]->subcommittees[$scId]->name ?? $committees[$cId]->name ?? 'N/A';
+
+            }
+        }
+
+         foreach ($committees as $c)
+            $c->save();
+
     }
 
 }

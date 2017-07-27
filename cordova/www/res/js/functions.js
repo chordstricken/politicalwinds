@@ -107,7 +107,8 @@ function stateFull(abbrev) {
 
 /** Member Index Object **/
 function getMemberHeadshot(member) {
-    return '/api/static/members/photos/' + member.id[0] + '/' + member.id + '.jpg';
+    var mId = member.id ? member.id.toString() : '0';
+    return '/api/static/members/photos/' + mId[0] + '/' + mId + '.jpg';
 }
 
 /**
@@ -162,3 +163,13 @@ Vue.component('Loader', {
     props: ['isbusy'],
     template: '<div class="text-center h1" v-show="isbusy"><i class="fa fa-spinner fa-spin"></i> Loading...</div>'
 });
+
+function isNumber(param) {
+    return typeof param === "number";
+}
+function isObject(param) {
+    return typeof param === "object";
+}
+function isString(param) {
+    return typeof param === "string";
+}

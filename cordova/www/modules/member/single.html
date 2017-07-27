@@ -15,8 +15,17 @@
 
                     <div class="col-md-8">
 
-                        <h1 v-text="member.name.official_full"></h1>
-                        <div class="h2" v-if="currentTerm.party" v-html="getPartyLabelLong(currentTerm.party)"></div>
+                        <h1 v-text="memberFullName"></h1>
+                        <div class="row">
+                            <div class="h2 col-md-4" v-if="currentTerm.party" v-html="getPartyLabelLong(currentTerm.party)"></div>
+                            <div class="social-icons col-md-8" v-if="member.social">
+                                <a :href="'https://twitter.com/' + member.social.twitter" v-if="member.social.twitter" target="_blank"><i class="fa fa-twitter-square"></i></a>
+                                <a :href="'https://facebook.com/' + member.social.facebook" v-if="member.social.facebook" target="_blank"><i class="fa fa-facebook-official"></i></a>
+                                <a :href="'https://instagram.com/' + member.social.instagram" v-if="member.social.instagram" target="_blank"><i class="fa fa-instagram"></i></a>
+                                <a :href="'https://youtube.com/user/' + member.social.youtube" v-if="member.social.youtube" target="_blank"><i class="fa fa-youtube-square"></i></a>
+                            </div>
+                        </div>
+
                         <hr>
 
                         <div class="row">
@@ -62,13 +71,6 @@
                                         <i class="fa fa-external-link"></i>
                                         <span v-text="currentTerm.url"></span>
                                     </a>
-
-                                    <div class="social-icons" v-if="member.social">
-                                        <a :href="'https://twitter.com/' + member.social.twitter" v-if="member.social.twitter" target="_blank"><i class="fa fa-twitter-square"></i></a>
-                                        <a :href="'https://facebook.com/' + member.social.facebook" v-if="member.social.facebook" target="_blank"><i class="fa fa-facebook-official"></i></a>
-                                        <a :href="'https://instagram.com/' + member.social.instagram" v-if="member.social.instagram" target="_blank"><i class="fa fa-instagram"></i></a>
-                                        <a :href="'https://youtube.com/user/' + member.social.youtube" v-if="member.social.youtube" target="_blank"><i class="fa fa-youtube-square"></i></a>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -84,24 +86,37 @@
 
     <section class="container container--member-feed">
 
-        <h3>Terms</h3>
-        <ul class="list-group">
-            <li class="list-group-item" v-for="term in member.terms">
-                <div class="row">
-                    <div class="col-sm-6">
-                        <span class="start-date" v-text="getDatePretty(term.start)"></span> to <span class="end-date" v-text="getDatePretty(term.end)"></span>
-                        <span class="pull-right" v-html="getPartyLabelShort(term.party)"></span>
-                    </div>
-                    <div class="col-sm-6">
-                        <span v-if="term.state" v-text="stateFull(term.state)"></span>
-                        <span v-if="term.type" v-html="getOfficeLabel(term.type)"></span>
-                        <span v-if="term.district" v-text="'District ' + term.district"></span>
-                    </div>
-                </div>
-            </li>
-        </ul>
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Terms</h3>
+                <ul class="list-group">
+                    <li class="list-group-item" v-for="term in member.terms">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <span class="start-date" v-text="getDatePretty(term.start)"></span> to <span class="end-date" v-text="getDatePretty(term.end)"></span>
+                                <span class="pull-right" v-html="getPartyLabelShort(term.party)"></span>
+                            </div>
+                            <div class="col-sm-6">
+                                <span v-if="term.state" v-text="stateFull(term.state)"></span>
+                                <span v-if="term.type" v-html="getOfficeLabel(term.type)"></span>
+                                <span v-if="term.district" v-text="'District ' + term.district"></span>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-6" v-if="member.committees">
+                <h3>Committees</h3>
+                <table class="table">
+                    <tr v-for="(cName, cId) in member.committees">
+                        <td v-text="cId"></td>
+                        <td v-text="cName"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
 
-        <pre v-text="member"></pre>
+        <pre v-text="member" v-if="showRawData"></pre>
 
         <div class="text-center" v-if="!member || !member.id">
             <em>404: Page Not Found.</em>
