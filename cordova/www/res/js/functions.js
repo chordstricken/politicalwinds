@@ -6,6 +6,18 @@ $(document).on('click', '[href]', function(e) {
     }
 });
 
+var DB = {
+    set: function(key, val) {
+        localStorage.setItem(key, JSON.stringify(val));
+    },
+    get: function(key) {
+        return JSON.parse(localStorage.getItem(key));
+    },
+    del: function(key) {
+        localStorage.removeItem(key);
+    },
+};
+
 function getDateTime(timestamp) {
     if (!timestamp || timestamp < 2000)
         return '';
@@ -110,6 +122,14 @@ function getMemberHeadshot(member) {
     var mId = member.id ? member.id.toString() : '0';
     return '/api/static/members/photos/' + mId[0] + '/' + mId + '.jpg';
 }
+/**
+ * member headshot style
+ * @param member
+ * @returns {string}
+ */
+function getHeadshotBackgroundImage(member) {
+    return 'url(' + getMemberHeadshot(member) + '), url(/res/img/headshot-default.svg);';
+}
 
 /**
  * Outputs a pretty version of the member's Office
@@ -172,4 +192,19 @@ function isObject(param) {
 }
 function isString(param) {
     return typeof param === "string";
+}
+
+function getStateFromLocation(loc) {
+    var sArray = Object.keys(window.states);
+
+    function checkState(s, cb) {
+        if (!s) return;
+        $.getJSON('/api/static/us/states/' + s + '/shape.geojson', function(json) {
+            console.log(s, json.coordinates.length, json.coordinates[0].length, json.coordinates[0][0].length, json.coordinates[0][0][0].length);
+            checkState(sArray.shift());
+        });
+    }
+
+    checkState(sArray.shift());
+
 }

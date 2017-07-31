@@ -2,19 +2,7 @@ module.exports = function(grunt) {
 
     require('load-grunt-tasks')(grunt); // npm install --save-dev load-grunt-tasks
 
-
     grunt.initConfig({
-
-        uglify: {
-            options: {
-                mangle: false
-            },
-            dist: {
-                files: {
-                    'cordova/www/js/index.min.js': 'cordova/www/js/index.js'
-                }
-            }
-        },
 
         concat: {
             js: {
@@ -22,28 +10,37 @@ module.exports = function(grunt) {
                     separator: ";\n"
                 },
                 src: [
+                    'bower_components/director/build/director.min.js',
                     'bower_components/jquery/dist/jquery.min.js',
-                    'bower_components/bootstrap/dist/js/bootstrap.js',
-                    'bower_components/vue/dist/vue.js',
-                    'cordova/www/js/index.min.js',
+                    'bower_components/bootstrap/dist/js/bootstrap.min.js',
+                    'bower_components/vue/dist/vue.min.js',
                 ],
-                dest: 'cordova/www/js/app.min.js'
+                dest: 'www/res/js/plugins.min.js'
+            }
+        },
+
+        sass: {
+            dist: {
+                files: {
+                    'www/res/css/index.css': 'www/res/css/index.scss'
+                }
             }
         },
 
         watch: {
-            files: [
-                'cordova/www/js/*.js',
-            ],
-            tasks: ['default']
-        },
+            styles: {
+                files: [
+                    'www/res/css/*.scss',
+                ],
+                tasks: ['sass']
+            }
+        }
 
-        compile: {}
     })
 
     grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-concat');
-    grunt.registerTask('default', ['uglify', 'concat']);
+    grunt.loadNpmTasks('grunt-contrib-sass');
+    grunt.registerTask('default', ['concat', 'sass']);
 
 }

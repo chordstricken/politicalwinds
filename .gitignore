@@ -1,4 +1,5 @@
 config.json
+/repos
 /log/*
 /api/static
 /vendor/

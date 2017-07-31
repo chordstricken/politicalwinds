@@ -1,11 +1,17 @@
 <div id="vue-app">
-    <section class="container-fluid container--form">
-
+    <section class="container-fluid container--search text-center">
         <div class="row">
-            <div class="col-sm-8 col-sm-offset-2">
-                <form class="form-inline" @submit.prevent="search">
-                    <input class="form-control" type="text" v-model="query" placeholder="Search for a politician">
-                    <button class="btn btn-primary">Search</button>
+            <div class="col-md-6">
+                <button @click="findMyReps" class="btn btn-primary"><i class="fa fa-crosshairs"></i> Find My Representatives</button>
+                <br /><br />
+            </div>
+            <div class="col-md-6">
+                <form @submit.prevent="searchForReps" class="form-horizontal">
+                    <div class="input-group">
+                        <input class="form-control" type="text" v-model="query" placeholder="Search for a politician">
+                        <div class="input-group-addon"><i class="fa fa-search"></i></div>
+                    </div>
+                    <small>Search for politicians by name or state</small>
                 </form>
             </div>
         </div>
@@ -18,15 +24,11 @@
         <hr>
 
         <div class="row" v-if="resultCount > 0">
-            <div class="col-md-4 col-sm-6 col-xs-12" v-for="(member, id) in results">
+            <div class="col-md-4 col-sm-6 col-xs-12" v-for="(member, id) in searchResults">
 
                 <a class="index-card media" :href="'#/member/v/' + id">
                     <div class="media-left">
-                        <div class="headshot">
-                            <object :data="getMemberHeadshot(member)" type="image/jpg">
-                                <img src="res/img/headshot-default.svg">
-                            </object>
-                        </div>
+                        <div class="headshot" :style="'background-image: ' + getHeadshotBackgroundImage(member)"></div>
                     </div>
                     <div class="media-body">
                         <h4 class="media-heading">

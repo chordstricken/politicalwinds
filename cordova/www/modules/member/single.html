@@ -6,11 +6,7 @@
             <div class="info">
                 <div class="row">
                     <div class="col-md-4">
-                        <div class="headshot text-center">
-                            <object :data="getMemberHeadshot(member)" type="image/jpg">
-                                <img src="res/img/headshot-default.svg">
-                            </object>
-                        </div>
+                        <div class="headshot" :style="'background-image: ' + getHeadshotBackgroundImage(member)"></div>
                     </div>
 
                     <div class="col-md-8">

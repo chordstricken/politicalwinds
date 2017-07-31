@@ -30,12 +30,34 @@ body {
     background-color: #eeeeee;
 }
 
+/* accommodate nav bar */
 #vue-app section:first-child {
     background-color: #ffffff;
     margin-top: 20px;
     padding: 60px 0 30px;
 }
 
+/** Default styles **/
+.list-group-item {
+    border-radius: 0;
+}
+.table {
+    background-color: #ffffff;
+}
+.table td, .table th {
+    padding: 1rem;
+}
+.table tr {
+    border: 1px solid #ddd;
+}
+.headshot {
+    background-size: cover;
+    background-repeat: no-repeat;
+    overflow: hidden;
+}
+
+
+/** Member index cards **/
 .index-card {
     color: black;
     display: block;
@@ -57,14 +79,9 @@ body {
     width: 100px;
     overflow: hidden;
 }
-.index-card .headshot object {
-    width: 100px;
-}
-.index-card .headshot img {
-    width: 100px;
-    height: 100px;
-}
 
+
+/** Member Single page **/
 .container--member-bio {
     font-size: 1.5em;
 }
@@ -95,16 +112,4 @@ body {
 .container--member-bio .website {
     word-wrap: break-word;
     word-break: break-all;
-}
-.list-group-item {
-    border-radius: 0;
-}
-.table {
-    background-color: #ffffff;
-}
-.table td, .table th {
-    padding: 1rem;
-}
-.table tr {
-    border: 1px solid #ddd;
 }
