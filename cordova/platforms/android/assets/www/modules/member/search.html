@@ -1,0 +1,58 @@
+<section class="container-fluid container--search text-center bg-white">
+    <x-alerts :alerts="alerts"></x-alerts>
+
+    <div class="row">
+        <div class="col-md-6">
+            <button @click="findMyReps" class="btn btn-primary" :disabled="isBusy.findLoc"><i class="fa" :class="isBusy.findLoc ? 'fa-spinner fa-spin' : 'fa-crosshairs'"></i> Find My Representatives</button>
+            <br /><br />
+        </div>
+        <div class="col-md-6 text-center">
+            <form @submit.prevent="searchForReps" class="form-horizontal">
+                <div class="input-group" style="width: 200px; margin:0 auto;">
+                    <input class="form-control" type="text" v-model="query" placeholder="Search for a politician">
+                    <div class="input-group-addon"><i class="fa fa-search"></i></div>
+                </div>
+                <small>Search for politicians by name or state</small>
+            </form>
+        </div>
+    </div>
+
+</section>
+
+<section class="container container--results">
+    <x-loader v-if="isBusy.loading"></x-loader>
+
+    <hr>
+
+    <div class="row" >
+        <div class="col-md-4 col-sm-6 col-xs-12" v-for="member in searchResults">
+
+            <a class="index-card media">
+                <div class="media-left" :href="'#/member/v/' + member.id">
+                    <div class="headshot" :style="'background-image: ' + getHeadshotBackgroundImage(member)"></div>
+                </div>
+                <div class="media-body">
+                    <h4 class="media-heading" :href="'#/member/v/' + member.id">
+                        <span v-text="member.name"></span>
+                        <small class="pull-right" v-if="member.party" v-html="getPartyLabelShort(member.party)"></small>
+                    </h4>
+                    <div class="media">
+                        <div class="pull-right btn btn-info btn-xs" v-if="!myMembers[member.id]" @click="toggleFollowing(member.id)">Follow</div>
+                        <div class="pull-right btn btn-default btn-xs" v-else @click="toggleFollowing(member.id)">Un-follow</div>
+
+                        <div v-if="member.office" v-html="getOfficeLabel(member.office)"></div>
+                        <div v-if="member.state || member.district">
+                            <span v-if="member.state" v-text="stateFull(member.state)"></span>
+                            <span class="badge" v-if="member.district" v-text="'District ' + member.district"></span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+    </div>
+    <div class="text-center" v-if="!count(searchResults)">
+        <em>No results found.</em>
+    </div>
+
+</section>

@@ -1,0 +1,40 @@
+{
+  "name": "point-inside-polygon",
+  "description": "Check if point is inside polygon",
+  "main": "index.js",
+  "authors": [
+    "Erlend Fagerheim"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "point",
+    "polygon",
+    "inside",
+    "intersect",
+    "geometry",
+    "geo"
+  ],
+  "homepage": "https://github.com/erf/point-inside-polygon",
+  "moduleType": [
+    "globals",
+    "node"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "version": "1.0.3",
+  "_release": "1.0.3",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.0.3",
+    "commit": "bc9396a0008c8f01337c6a666b6098b1646d658f"
+  },
+  "_source": "https://github.com/erf/point-inside-polygon.git",
+  "_target": "^1.0.3",
+  "_originalSource": "point-inside-polygon",
+  "_direct": true
+}

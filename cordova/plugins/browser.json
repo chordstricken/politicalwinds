@@ -9,6 +9,18 @@
     "installed_plugins": {
         "cordova-plugin-whitelist": {
             "PACKAGE_NAME": "org.blackmast.politics"
+        },
+        "cordova-plugin-geolocation": {
+            "PACKAGE_NAME": "org.blackmast.politics"
+        },
+        "cordova-plugin-compat": {
+            "PACKAGE_NAME": "org.blackmast.politics"
+        },
+        "cordova-plugin-splashscreen": {
+            "PACKAGE_NAME": "org.blackmast.politics"
+        },
+        "cordova-plugin-statusbar": {
+            "PACKAGE_NAME": "org.blackmast.politics"
         }
     },
     "dependent_plugins": {}

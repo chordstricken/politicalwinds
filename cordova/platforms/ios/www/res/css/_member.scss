@@ -1,0 +1,34 @@
+
+
+/** Member Single page **/
+.container--member-bio {
+  font-size: 1.5em;
+}
+
+.container--member-bio .headshot {
+  width: 200px;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 100px;
+  margin: 20px;
+}
+.container--member-bio .headshot object,
+.container--member-bio .headshot img {
+  min-width: 100%;
+  min-height: 100%;
+}
+.container--member-bio .info {
+  margin: 20px;
+}
+.container--member-bio .social-icons a {
+  font-size: 2.5em;
+}
+
+.container--member-bio .office-info-item {
+  display: block;
+  margin: 1em 0;
+}
+.container--member-bio .website {
+  word-wrap: break-word;
+  word-break: break-all;
+}

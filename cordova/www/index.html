@@ -29,7 +29,12 @@
             * Enable inline JS: add 'unsafe-inline' to default-src
     -->
     <meta http-equiv="Content-Security-Policy"
-          content="default-src 'self' 'unsafe-inline' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+          content="
+          default-src 'self' 'unsafe-inline' file: data: gap: https://ssl.gstatic.com 'unsafe-eval' http://a.tiles.mapbox.com http://politics.blackmast.org http://d2fgvqi101p3vq.cloudfront.net;
+          style-src 'self' 'unsafe-inline' file:;
+          media-src *;
+          img-src 'self' file: data: content: http://politics.blackmast.org http://d2fgvqi101p3vq.cloudfront.net http://api.tiles.mapbox.com">
+
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="viewport"
@@ -67,12 +72,20 @@
         <!-- Start app with splash page -->
     </div>
 
+
+    <!-- Alerts template. Used for displaying API call alerts -->
+    <script id="x-alerts-template" type="text/x-template">
+        <div class="alerts-container">
+            <div class="alert alert-danger" v-if="alerts.error" v-html="alerts.error"></div>
+            <div class="alert alert-success" v-if="alerts.success" v-html="alerts.success"></div>
+            <div class="alert alert-warning" v-if="alerts.warning" v-html="alerts.warning"></div>
+            <div class="alert alert-info" v-if="alerts.info" v-html="alerts.info"></div>
+        </div>
+    </script>
+
     <script type="text/javascript" src="cordova.js"></script>
 
-    <script type="text/javascript" src="res/js/director.min.js"></script>
-    <script type="text/javascript" src="res/js/jquery.min.js"></script>
-    <script type="text/javascript" src="res/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="res/js/vue.min.js"></script>
+    <script type="text/javascript" src="res/js/plugins.min.js"></script>
     <script type="text/javascript" src="res/js/functions.js"></script>
     <script type="text/javascript" src="res/js/main.js"></script>
 </body>

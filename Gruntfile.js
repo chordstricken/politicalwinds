@@ -14,15 +14,17 @@ module.exports = function(grunt) {
                     'bower_components/jquery/dist/jquery.min.js',
                     'bower_components/bootstrap/dist/js/bootstrap.min.js',
                     'bower_components/vue/dist/vue.min.js',
+                    'bower_components/haversine/haversine.js',
+                    'bower_components/point-inside-polygon/index.js',
                 ],
-                dest: 'www/res/js/plugins.min.js'
+                dest: 'cordova/www/res/js/plugins.min.js'
             }
         },
 
         sass: {
             dist: {
                 files: {
-                    'www/res/css/index.css': 'www/res/css/index.scss'
+                    'cordova/www/res/css/index.css': 'cordova/www/res/css/index.scss'
                 }
             }
         },
@@ -30,7 +32,7 @@ module.exports = function(grunt) {
         watch: {
             styles: {
                 files: [
-                    'www/res/css/*.scss',
+                    'cordova/www/res/css/*.scss',
                 ],
                 tasks: ['sass']
             }

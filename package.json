@@ -15,15 +15,5 @@
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-uglify": "^3.0.1",
     "load-grunt-tasks": "^3.5.2"
-  },
-  "dependencies": {
-    "aws-sdk": "^2.77.0",
-    "bluebird": "^3.5.0",
-    "config": "^1.26.1",
-    "deasync": "^0.1.10",
-    "js-yaml": "^3.8.4",
-    "merge": "^1.2.0",
-    "request": "^2.81.0",
-    "request-promise": "^4.2.1"
   }
 }

@@ -7,7 +7,20 @@
         "files": {}
     },
     "installed_plugins": {
+        "cordova-plugin-geolocation": {
+            "GEOLOCATION_USAGE_DESCRIPTION": " ",
+            "PACKAGE_NAME": "org.blackmast.politics"
+        },
         "cordova-plugin-whitelist": {
+            "PACKAGE_NAME": "org.blackmast.politics"
+        },
+        "cordova-plugin-compat": {
+            "PACKAGE_NAME": "org.blackmast.politics"
+        },
+        "cordova-plugin-splashscreen": {
+            "PACKAGE_NAME": "org.blackmast.politics"
+        },
+        "cordova-plugin-statusbar": {
             "PACKAGE_NAME": "org.blackmast.politics"
         }
     },
