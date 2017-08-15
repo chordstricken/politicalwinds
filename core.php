@@ -12,8 +12,7 @@ error_reporting(E_ALL & ~E_WARNING & ~E_NOTICE & ~E_STRICT);
 
 // check php version
 if (!defined('PHP_VERSION_ID') || PHP_VERSION_ID < 70000) {
-    echo 'Charon requires PHP Version 7.0 or above.';
-    die();
+    die("Political Winds requires PHP Version 7.0 or above.\n");
 }
 
 /**
@@ -28,7 +27,7 @@ spl_autoload_extensions('.php');
 spl_autoload_register('spl_autoload');
 
 if (!file_exists(__DIR__ . '/vendor/autoload.php'))
-    die("Run composer install");
+    die("Run composer install\n");
 
 require_once(__DIR__ . '/vendor/autoload.php');
 
