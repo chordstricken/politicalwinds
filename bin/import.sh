@@ -1,7 +1,7 @@
 #!/bin/bash
 
 date
-runJob="time php $(dirname $0)/run-job.php"
+runJob="php $(dirname $0)/run-job.php"
 
 echo "Running ImportGeoJson"
 $runJob ImportGeoJson
