@@ -7,10 +7,10 @@
 require_once __DIR__ . '/../core.php';
 
 if (!isset($argv[1]))
-    die("Usage: $argv[0] <jobType> [<paramsJson>]");
+    die("Usage: $argv[0] <jobType> [<paramsJson>]\n");
 
 if (!class_exists($controllerName = "controllers\\jobs\\$argv[1]"))
-    die("Job Controller not found.");
+    die("Job Controller not found.\n");
 
 $params = isset($argv[2]) ? json_decode($argv[2]) : [];
 
