@@ -7,7 +7,7 @@
  *
  */
 
-namespace core\db;
+namespace core\db\traits;
 use \Exception;
 
 /**

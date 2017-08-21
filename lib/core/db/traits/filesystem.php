@@ -7,7 +7,7 @@
  *
  */
 
-namespace core\db;
+namespace core\db\traits;
 use \Exception;
 
 /**
@@ -63,9 +63,11 @@ trait Filesystem {
      * @param $query
      * @param array $queryOptions
      * @throws Exception
+     * @return static
      */
     public static function findOne($query, $queryOptions = []) {
         if (!isset($query['id'])) throw new Exception('Unable to find document without ID');
+
     }
 
     /**

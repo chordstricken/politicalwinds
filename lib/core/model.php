@@ -84,6 +84,13 @@ abstract class Model {
     }
 
     /**
+     * Returns the number of objects matching the query
+     * @param $query
+     * @return int|false
+     */
+    abstract public static function count($query = []);
+
+    /**
      * Finds a single object
      * @param $query
      * @return static|null
@@ -99,11 +106,12 @@ abstract class Model {
     abstract public static function findMulti($query, $queryOptions = []);
 
     /**
-     * Returns the number of objects matching the query
+     * Returns an array of objects (in memory)
      * @param $query
-     * @return int|false
+     * @param $set
+     * @return bool
      */
-    abstract public static function count($query = []);
+    abstract public static function updateMulti($query, $set);
 
     /**
      * Deletes objects from the table
@@ -111,6 +119,6 @@ abstract class Model {
      * @return int|false
      * @throws Exception
      */
-    abstract public static function deleteQuery(array $query);
+    abstract public static function deleteMulti(array $query);
 
 }
