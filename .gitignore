@@ -1,4 +1,6 @@
+.sass-cache
 config.json
+data/db-update-history.json
 /cache
 /repos
 /log/*
