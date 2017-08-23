@@ -20,9 +20,11 @@ trait Blackhole {
     public function save() {}
     public function update($set) {}
     public function delete() {}
+    public static function count($query = []) {}
     public static function findOne($query, $queryOptions = []) {}
     public static function findMulti($query, $queryOptions = []) {}
-    public static function count($query = []) {}
-    public static function deleteQuery(array $query) {}
+    public static function deleteMulti(array $query) {}
+    public static function insertMulti($set, $replace = false) {}
+    public static function updateMulti($query, $set) {}
 
 }

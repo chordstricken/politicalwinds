@@ -51,7 +51,7 @@ class Mysql extends mysqli {
      * @return string
      */
     public static function escapeWithQuotes($str) {
-        return '"' . self::escape($str) . '"';
+        return $str === null ? 'NULL' : '"' . self::escape($str) . '"';
     }
 
     /**
@@ -94,7 +94,7 @@ class Mysql extends mysqli {
 
             // basic $key = $value
             if (is_scalar($value)) {
-                $valSafe = self::escape($value);
+                $valSafe = self::escapeWithQuotes($value);
                 $query[] = "$keySafe = $valSafe";
                 continue;
             }
@@ -124,6 +124,25 @@ class Mysql extends mysqli {
         $result = [];
         foreach ($sort as $field => $direction)
             $result[] = self::escapeField($field) . ($direction > 0 ? 'ASC' : 'DESC');
+
+        return implode(', ', $result);
+    }
+
+    /**
+     * Generates a value clause for an UPDATE query
+     *
+     * @param $array
+     * @return string
+     */
+    public static function buildUpdate($array) {
+        $array = (array)$array;
+
+        if (empty($array))
+            return '1=1'; // ORDER BY 1
+
+        $result = [];
+        foreach ($array as $field => $value)
+            $result[] = self::escapeField($field) . '=' . self::escapeWithQuotes($value);
 
         return implode(', ', $result);
     }

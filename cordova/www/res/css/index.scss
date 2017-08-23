@@ -1,5 +1,11 @@
 $white: #ffffff;
 $black: #000000;
+$black-1: #222222;
+$brand-red: #c33;
+$brand-blue: #33c;
+$border-gray: #cccccc;
+$bg-gray: #eeeeee;
 
 @import "default";
+@import "nav";
 @import "member";

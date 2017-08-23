@@ -22,4 +22,18 @@ class Format {
             return parse_url($path, PHP_URL_HOST);
     }
 
+    /**
+     * Returns the number with its ordinal suffix
+     * 13 -> 13th
+     * @param $num
+     * @return string
+     */
+    public static function ordSuffix($num) {
+        $ends = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
+        if ((($num % 100) >= 11) && (($num % 100) <= 13))
+            return $num . 'th';
+        else
+            return $num . $ends[$num % 10];
+    }
+
 }

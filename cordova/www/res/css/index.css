@@ -28,11 +28,19 @@ body {
   -webkit-user-select: none;
   /* prevent copy paste, to allow, change 'none' to 'text' */
   /* Move down content because we have a fixed navbar that is 50px tall */
-  padding-top: 50px;
   background-color: #eeeeee; }
 
 section {
   padding: 20px 0; }
+  section h1 {
+    margin: 0;
+    font-size: 20px; }
+
+#vue-app {
+  position: relative;
+  min-height: 100vh;
+  width: 100vw;
+  overflow: auto; }
 
 .bg-white {
   background-color: #ffffff; }
@@ -73,6 +81,34 @@ section {
     height: 100px;
     width: 100px;
     overflow: hidden; }
+
+.x-nav {
+  height: 10vh; }
+  .x-nav .sticky {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 10vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    box-sizing: border-box;
+    z-index: 1000; }
+    .x-nav .sticky > * {
+      flex-grow: 1;
+      font-size: 4vh;
+      display: block;
+      background-color: #eeeeee;
+      color: #222222;
+      text-align: center;
+      padding-top: 1.75vh;
+      padding-bottom: 0;
+      border-bottom: 3px solid #cccccc; }
+      .x-nav .sticky > *.active {
+        color: #c33;
+        background-color: #ffffff;
+        border-bottom-color: #33c; }
 
 /** Member Single page **/
 .container--member-bio {

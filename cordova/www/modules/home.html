@@ -1,35 +1,20 @@
+<x-nav active="home"></x-nav>
 
 <section class="container container--results">
+    <h1>Activity Feed</h1>
+
     <x-loader v-if="isBusy"></x-loader>
 
     <hr>
 
     <div class="row" v-if="count(results) > 0">
+
         <div class="col-md-4 col-sm-6 col-xs-12" v-for="(member, id) in results">
+            <div class="index-card">
 
-            <a class="index-card media">
-                <div class="media-left" :href="'#/member/v/' + id">
-                    <div class="headshot" :style="'background-image: ' + getHeadshotBackgroundImage(member)"></div>
-                </div>
-                <div class="media-body">
-                    <h4 class="media-heading" :href="'#/member/v/' + id">
-                        <span v-text="member.name"></span>
-                        <small class="pull-right" v-if="member.party" v-html="getPartyLabelShort(member.party)"></small>
-                    </h4>
-                    <div class="media">
-                        <div class="pull-right btn btn-info btn-xs" v-if="!myMembers[id]" @click="toggleFollowing(id)">Follow</div>
-                        <div class="pull-right btn btn-default btn-xs" v-else @click="toggleFollowing(id)">Un-follow</div>
-
-                        <div v-if="member.office" v-html="getOfficeLabel(member.office)"></div>
-                        <div v-if="member.state || member.district">
-                            <span v-if="member.state" v-text="stateFull(member.state)"></span>
-                            <span class="badge" v-if="member.district" v-text="'District ' + member.district"></span>
-                        </div>
-                    </div>
-                </div>
-            </a>
-
+            </div>
         </div>
+
     </div>
     <div class="text-center" v-if="count(results) == 0">
         <em>No results found.</em>

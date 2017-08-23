@@ -1,8 +1,11 @@
+<x-nav active="members"></x-nav>
 
 <section class="container-fluid container--member-bio">
     <div class="container">
 
-        <div class="info">
+        <div v-if="isBusy"><x-loader></x-loader></div>
+
+        <div class="info" v-if="!isBusy">
             <div class="row">
                 <div class="col-md-4">
                     <div class="headshot" :style="'background-image: ' + getHeadshotBackgroundImage(member)"></div>
@@ -82,7 +85,7 @@
 <section class="container container--member-feed">
 
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-6" v-if="member.terms && count(member.terms)">
             <h3>Terms</h3>
             <ul class="list-group">
                 <li class="list-group-item" v-for="term in member.terms">
@@ -100,7 +103,7 @@
                 </li>
             </ul>
         </div>
-        <div class="col-md-6" v-if="member.committees">
+        <div class="col-md-6" v-if="member.committees && count(member.committees)">
             <h3>Committees</h3>
             <table class="table">
                 <tr v-for="(cName, cId) in member.committees">
@@ -112,9 +115,5 @@
     </div>
 
     <pre v-text="member" v-if="showRawData"></pre>
-
-    <div class="text-center" v-if="!member || !member.id">
-        <em>404: Page Not Found.</em>
-    </div>
 
 </section>

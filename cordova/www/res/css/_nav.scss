@@ -1,0 +1,34 @@
+.x-nav {
+  height: 10vh;
+
+  .sticky {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 10vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    box-sizing: border-box;
+    z-index: 1000;
+
+    > * {
+      flex-grow: 1;
+      font-size: 4vh;
+      display: block;
+      background-color: $bg-gray;
+      color: $black-1;
+      text-align: center;
+      padding-top: 1.75vh;
+      padding-bottom: 0;
+      border-bottom: 3px solid $border-gray;
+
+      &.active {
+        color: $brand-red;
+        background-color: $white;
+        border-bottom-color: $brand-blue;
+      }
+    }
+  }
+}

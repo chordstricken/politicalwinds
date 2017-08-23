@@ -3,7 +3,6 @@ var _vueObj = {
     data: {
         alert: {},
         isBusy: true,
-        results: {},
         myMembers: DB.get('my.members') || {},
         results: {},
     },

@@ -91,4 +91,42 @@ class Git {
         if ($path[0] === '/') $path = substr($path, 1);
         return ROOT . "/repos/$path";
     }
+
+
+    /**
+     * Performs a "git show"
+     * @param string $path local path to repo
+     * @param bool $as_array [OPTIONAL] setting to false returns the raw text
+     * @return mixed
+     */
+    public static function head($path, $as_array = true) {
+        $format = array(
+            'Hash: %H',
+            'Author: %an (%ae)',
+            'Date: %ad',
+            'Subject: %s',
+            'Body: %b',
+        );
+
+        $format    = implode("\n", $format);
+        $localPath = self::getLocalDir($path);
+        $exec      = "-C $localPath log -1 --format=\"$format\"";
+        $show      = self::exec($exec);
+
+        // return raw text?
+        if (!$as_array) {
+            return $show;
+        }
+
+        // convert the output into an array
+        $show_array = array_filter(explode("\n", $show), 'trim');
+        $result = array();
+        foreach ($show_array as $row) {
+            list($row_field, $row_value) = array_filter(explode(':', $row, 2), 'trim');
+            $result[$row_field] = $row_value;
+        }
+
+        return $result;
+    }
+
 }

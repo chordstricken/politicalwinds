@@ -15,16 +15,25 @@ use models\Member;
  */
 class ImportHeadshots extends \core\Job {
 
+    const REPO_URL = 'https://github.com/unitedstates/images';
+    const REPO_PATH = '/unitedstates/images';
+
     /**
      * Main work function
      */
     protected function doWork() {
         try {
-            $result = Git::pull('https://github.com/unitedstates/images', '/unitedstates/images');
-            Debug::info($result);
+            $oldHead = Git::head(self::REPO_PATH);
+            $result  = Git::pull(self::REPO_URL, self::REPO_PATH);
+            $newHead = Git::head(self::REPO_PATH);
+
+            if ($newHead['Hash'] === $oldHead['Hash']) {
+                Debug::info(__METHOD__ . " No new updates");
+                return;
+            }
 
             $apiPath       = ROOT . '/api/static/members/photos';
-            $repoImagePath = ROOT . '/repos/unitedstates/images/congress/225x275';
+            $repoImagePath = ROOT . '/repos/unitedstates/images/congress/450x550';
             $repoImages    = scandir($repoImagePath);
 
             foreach ($repoImages as $image) {

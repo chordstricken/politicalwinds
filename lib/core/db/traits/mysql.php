@@ -30,11 +30,14 @@ trait Mysql {
      */
     public function save() {
         try {
+            if (property_exists($this, 'date_added') && empty($this->date_added))
+                $this->date_added = date(DATE_ATOM);
+
             $table  = static::TABLE;
-            $array  = array_replace((array)self::new(), (array)$this); // Ignore fields not defined in class by default
+            $array  = array_intersect_key((array)$this, (array)self::new()); // Ignore fields not defined in class by default
             $fields = '`' . implode('`,`', array_keys($array)) . '`';
-            $values = implode(',', array_map('db\Mysql::escapeWithQuotes', $array));
-            $sql    = "INSERT INTO `$table` ($fields) VALUES ($values) ON DUPLICATE KEY UPDATE " . db\Mysql::buildFilter($this);
+            $values = implode(',', array_map('\core\db\Mysql::escapeWithQuotes', array_values($array)));
+            $sql    = "INSERT INTO `$table` ($fields) VALUES ($values) ON DUPLICATE KEY UPDATE " . db\Mysql::buildUpdate($array);
 
             if (!$result = db\Mysql::conn()->query($sql))
                 throw new Exception(__METHOD__ . " Failed. SQL: $sql");
@@ -107,11 +110,13 @@ trait Mysql {
      * @param $query
      * @return object|null
      */
-    public static function findOne($query) {
+    public static function findOne($query, $opts = []) {
         try {
+
             $query  = db\Mysql::buildFilter((array)$query);
             $table  = static::TABLE;
-            $sql    = "SELECT * FROM `$table` WHERE $query LIMIT 1";
+            $sort   = isset($opts['sort']) ? 'ORDER BY ' . db\Mysql::buildSort($opts['sort']) : '';
+            $sql    = "SELECT * FROM `$table` WHERE $query $sort LIMIT 1";
 
             if (!$result = db\Mysql::conn()->query($sql))
                 throw new Exception(__METHOD__ . " Failed. SQL: $sql");
@@ -163,7 +168,7 @@ trait Mysql {
 
                 $sql = rtrim("SELECT * FROM $table WHERE $query $sort $limit");
 
-                if (!$result = db\Mysql::conn()->query($sql))
+                if (!self::$queryResults[$resultId] = db\Mysql::conn()->query($sql))
                     throw new Exception(__METHOD__ . " Failed. SQL: $sql");
 
             } catch (Exception $e) {
@@ -183,17 +188,15 @@ trait Mysql {
     }
 
     /**
-     * Updates the table according to the query
-     * @param $query
-     * @param $set
+     * Deletes according to a query
+     * @param array $query
      * @return bool
      */
-    public static function updateMulti($query, $set) {
+    public static function deleteMulti(array $query) {
         try {
-            $set    = db\Mysql::buildFilter((array)$set);
             $query  = db\Mysql::buildFilter((array)$query);
             $table  = static::TABLE;
-            $sql    = "UPDATE `$table` SET $set WHERE $query";
+            $sql    = "DELETE FROM `$table` WHERE $query";
 
             if (!$result = db\Mysql::conn()->query($sql))
                 throw new Exception(__METHOD__ . " Failed. SQL: $sql");
@@ -207,15 +210,48 @@ trait Mysql {
     }
 
     /**
-     * Deletes according to a query
-     * @param array $query
+     * Inserts multiple values
+     * @param $set
+     * @param bool $replace
      * @return bool
      */
-    public static function deleteMulti(array $query) {
+    public static function insertMulti($set, $replace = false) {
         try {
+            $table = static::TABLE;
+            $blank = (array)self::new();
+
+            $values = [];
+            $fields = '`' . implode('`,`', array_keys($blank)) . '`';
+            foreach ($set as $object) {
+                $array    = array_intersect_key((array)$object, $blank); // Ignore fields not defined in class by default
+                $values[] = '(' . implode(',', array_map('\core\db\Mysql::escapeWithQuotes', array_values($array))) . ')';
+            }
+            $values  = implode(',', $values);
+            $sql     = ($replace ? 'REPLACE' : 'INSERT') . " INTO `$table` ($fields) VALUES $values";
+
+            if (!$result = db\Mysql::conn()->query($sql))
+                throw new Exception(__METHOD__ . " Failed. SQL: $sql");
+
+            return true;
+
+        } catch (Exception $e) {
+            Debug::error($e);
+            return false;
+        }
+    }
+
+    /**
+     * Updates the table according to the query
+     * @param $query
+     * @param $set
+     * @return bool
+     */
+    public static function updateMulti($query, $set) {
+        try {
+            $set    = db\Mysql::buildUpdate((array)$set);
             $query  = db\Mysql::buildFilter((array)$query);
             $table  = static::TABLE;
-            $sql    = "DELETE FROM `$table` WHERE $query";
+            $sql    = "UPDATE `$table` SET $set WHERE $query";
 
             if (!$result = db\Mysql::conn()->query($sql))
                 throw new Exception(__METHOD__ . " Failed. SQL: $sql");

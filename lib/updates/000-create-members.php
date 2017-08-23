@@ -7,27 +7,39 @@
 
 $queries = [];
 
-$queries[] = "CREATE TABLE `members` (
-    `member_id`     varchar(127) NOT NULL,
-    `first_name`    varchar(255) NOT NULL,
-    `last_name`     varchar(255) NOT NULL,
-    `full_name`     varchar(255) DEFAULT NULL,
-    `bioguide_id`   varchar(255) DEFAULT NULL,
-    `thomas_id`     varchar(255) DEFAULT NULL,
-    `govtrack_id`   varchar(255) DEFAULT NULL,
-    `twitter_id`    varchar(255) DEFAULT NULL,
-    `instagram_id`  varchar(255) DEFAULT NULL,
-    `facebook_id`   varchar(255) DEFAULT NULL,
-    `gender`        varchar(255) DEFAULT NULL,
-    `date_of_birth` date DEFAULT NULL,
-    `date_modified` timestamp DEFAULT CURRENT_TIMESTAMP,
-    `date_added`    timestamp DEFAULT '0000-00-00T00:00:00',
+$queries[] = "CREATE TABLE `member` (
+    `member_id`         varchar(127) NOT NULL,
+    `first_name`        varchar(255) NOT NULL,
+    `last_name`         varchar(255) NOT NULL,
+    `full_name`         varchar(255) DEFAULT NULL,
+    `bioguide_id`       varchar(255) DEFAULT NULL,
+    `thomas_id`         varchar(255) DEFAULT NULL,
+    `govtrack_id`       varchar(255) DEFAULT NULL,
+    `opensecrets_id`    varchar(255) DEFAULT NULL,
+    `votesmart_id`      varchar(255) DEFAULT NULL,
+    `cspan_id`          varchar(255) DEFAULT NULL,
+    `wikipedia_id`      varchar(255) DEFAULT NULL,
+    `house_history_id`  varchar(255) DEFAULT NULL,
+    `ballotpedia_id`    varchar(255) DEFAULT NULL,
+    `maplight_id`       varchar(255) DEFAULT NULL,
+    `icpsr_id`          varchar(255) DEFAULT NULL,
+    `wikidata_id`       varchar(255) DEFAULT NULL,
+    `google_entity_id`  varchar(255) DEFAULT NULL,
+    `twitter_id`        varchar(255) DEFAULT NULL,
+    `instagram_id`      varchar(255) DEFAULT NULL,
+    `facebook_id`       varchar(255) DEFAULT NULL,
+    `youtube_id`        varchar(255) DEFAULT NULL,
+    `gender`            varchar(255) DEFAULT NULL,
+    `religion`          varchar(255) DEFAULT NULL,
+    `date_of_birth`     date DEFAULT NULL,
+    `date_modified`     timestamp DEFAULT CURRENT_TIMESTAMP,
+    `date_added`        timestamp DEFAULT '0000-00-00T00:00:00',
     
     PRIMARY KEY(`member_id`)
 ) ENGINE=InnoDB";
 
-$queries[] = "CREATE TABLE `members_terms` (
-    `member_term_id`    bigint(20) NOT NULL AUTO_INCREMENT,
+$queries[] = "CREATE TABLE `member_term` (
+    `member_term_id`    varchar(127) NOT NULL,
     `member_id`         varchar(127) NOT NULL,
     `start`             date DEFAULT NULL,
     `end`               date DEFAULT NULL,
@@ -48,10 +60,10 @@ $queries[] = "CREATE TABLE `members_terms` (
     
 ) ENGINE=InnoDB";
 
-$queries[] = "CREATE TABLE `members_committees` (
-    `member_committee_id`   bigint(20) NOT NULL AUTO_INCREMENT,
+$queries[] = "CREATE TABLE `member_committee` (
+    `member_committee_id`   varchar(127) NOT NULL,
     `member_id`             varchar(127) NOT NULL,
-    `committee_id`          varchar(255) NOT NULL,
+    `committee_id`          varchar(127) NOT NULL,
     `date_modified`         timestamp DEFAULT CURRENT_TIMESTAMP,
     `date_added`            timestamp DEFAULT '0000-00-00T00:00:00',
     

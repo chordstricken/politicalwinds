@@ -433,5 +433,6 @@ $(document).on('click', '[href]', function(e) {
 });
 
 
-Vue.component('x-loader', {template: '<div class="text-center h1"><i class="fa fa-spinner fa-spin"></i> Loading...</div>'});
-Vue.component('x-alerts', {props: {alerts: Object}, template: '#x-alerts-template'});
+Vue.component('x-nav',    {template: '#x-nav-template', props: {active: String}});
+Vue.component('x-loader', {template: '#x-loader-template'});
+Vue.component('x-alerts', {template: '#x-alerts-template', props: {alerts: Object}});

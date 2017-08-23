@@ -18,7 +18,7 @@ class Validator extends \Exception {
 
     /**
      * Singleton method. Returns uncached instance
-     * @return Validate
+     * @return self
      */
     public static function init() {
         return new self();

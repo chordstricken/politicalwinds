@@ -13,6 +13,8 @@ use core\Git;
  * @package prunejuice
  */
 class ImportGeoJson extends \core\Job {
+    const REPO_URL  = 'https://github.com/unitedstates/districts';
+    const REPO_PATH = '/unitedstates/districts';
 
     private $states = [
         'AL' => 'Alabama',
@@ -73,8 +75,14 @@ class ImportGeoJson extends \core\Job {
      */
     protected function doWork() {
         try {
-            $result = Git::pull('https://github.com/unitedstates/districts', '/unitedstates/districts');
-            Debug::info($result);
+            $oldHead = Git::head(self::REPO_PATH);
+            $result  = Git::pull(self::REPO_URL, self::REPO_PATH);
+            $newHead = Git::head(self::REPO_PATH);
+
+            if ($newHead['Hash'] === $oldHead['Hash']) {
+                Debug::info(__METHOD__ . " No new updates");
+                return;
+            }
 
             $year     = floor(date('Y') / 4) * 4;
             $APIPath  = ROOT . '/api/static/us/states';

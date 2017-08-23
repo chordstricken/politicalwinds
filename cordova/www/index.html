@@ -43,39 +43,36 @@
     <link rel="stylesheet" type="text/css" href="res/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="res/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="res/css/index.css">
-    <title>Political Tracker</title>
+    <title>Political Winds</title>
 </head>
 <body>
 
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
-                        aria-expanded="false" aria-controls="navbar">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="#">Political Tracker</a>
-            </div>
-            <div id="navbar" class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <!--<li><a href="#/">Home</a></li>-->
-                    <!--<li><a href="#/info">Info</a></li>-->
-                </ul>
-            </div><!--/.navbar-collapse -->
-        </div>
-    </nav>
-
     <div id="vue-app">
-        <!-- Start app with splash page -->
+        <!-- App content goes here -->
     </div>
+
+    <!-- Nav Template -->
+    <script id="x-nav-template" type="text/x-template">
+        <nav class="x-nav">
+            <div class="sticky">
+                <a href="#/"              :class="active === 'home' ? 'active' : ''"><i class="fa fa-home"></i></a>
+                <a href="#/member/search" :class="active === 'members' ? 'active' : ''"><i class="fa fa-search"></i></a>
+                <a href="#/bills"         :class="active === 'bills' ? 'active' : ''"><i class="fa fa-bank"></i></a>
+                <a href="#/info"          :class="active === 'info' ? 'active' : ''"><i class="fa fa-question-circle"></i></a>
+                <a href="#/settings"      :class="active === 'settings' ? 'active' : ''"><i class="fa fa-cog"></i></a>
+            </div>
+        </nav>
+    </script>
+
+    <!-- Loader template -->
+    <script id="x-loader-template" type="text/x-template">
+        <div class="text-center x-loader"><i class="fa fa-spinner fa-spin"></i> Loading...</div>
+    </script>
 
 
     <!-- Alerts template. Used for displaying API call alerts -->
     <script id="x-alerts-template" type="text/x-template">
-        <div class="alerts-container">
+        <div class="alerts-container x-alerts">
             <div class="alert alert-danger" v-if="alerts.error" v-html="alerts.error"></div>
             <div class="alert alert-success" v-if="alerts.success" v-html="alerts.success"></div>
             <div class="alert alert-warning" v-if="alerts.warning" v-html="alerts.warning"></div>

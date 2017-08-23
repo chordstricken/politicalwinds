@@ -10,30 +10,49 @@ namespace core;
 class Debug {
 
     /**
-     * @param mixed $message
+     * @param [mixed $message [mixed $...]]
+     * @return null
      */
-    public static function info($message) {
-        self::write($message, __FUNCTION__);
+    public static function info() {
+        $args = func_get_args();
+        array_unshift($args, __FUNCTION__);
+        return call_user_func_array('self::write', $args);
     }
 
     /**
      * @param mixed $message
+     * @return null
      */
     public static function error($message) {
-        self::write($message, __FUNCTION__);
+        $args = func_get_args();
+        array_unshift($args, __FUNCTION__);
+        return call_user_func_array('self::write', $args);
     }
 
     /**
-     * @param $message
      * @param $type
+     * @param [string $message, [$...]]
+     * @return null
      */
-    private static function write($message, $type) {
-        $message = $message instanceof \Exception ? $message->getMessage() : $message;
-        $message = is_scalar($message) ? $message : json_encode($message);
+    private static function write() {
+        $args    = func_get_args();
+        $type    = array_shift($args);
+        $message = implode(' ', array_map('self::formatMessage', $args));
 
         if (!is_dir(ROOT . '/log'))
             @mkdir(ROOT . '/log');
 
         @error_log(date(DATE_ATOM) . " -- $message\n", 3, ROOT . "/log/$type.log");
+        return null;
+    }
+
+    /**
+     * @param $message
+     * @return bool|float|int|string
+     */
+    private static function formatMessage($message) {
+        $message = $message instanceof \Exception ? $message->getMessage() : $message;
+        $message = is_scalar($message) ? $message : json_encode($message);
+        return $message;
     }
 }

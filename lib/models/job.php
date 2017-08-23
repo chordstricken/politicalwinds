@@ -9,7 +9,7 @@ use \Exception;
  * @since 7/12/17
  */
 class Job extends core\Model {
-    use core\db\Blackhole;
+    use core\db\traits\Blackhole;
 
     public $id;
     public $name;

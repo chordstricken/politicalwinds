@@ -26,12 +26,23 @@ body {
   -webkit-user-select: none;                  /* prevent copy paste, to allow, change 'none' to 'text' */
 
   /* Move down content because we have a fixed navbar that is 50px tall */
-  padding-top: 50px;
-  background-color: #eeeeee;
+  background-color: $bg-gray;
 }
 
 section {
   padding: 20px 0;
+
+  h1 {
+    margin: 0;
+    font-size: 20px;
+  }
+}
+
+#vue-app {
+  position: relative;
+  min-height: 100vh;
+  width: 100vw;
+  overflow: auto;
 }
 
 .bg-white { background-color: $white; }

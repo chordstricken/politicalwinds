@@ -6,6 +6,7 @@ use Symfony\Component\Yaml\Yaml;
 
 use \Exception;
 use core\CURL;
+use core\Git;
 use core\Debug;
 use models;
 
@@ -16,33 +17,44 @@ use models;
  */
 class ImportMembers extends \core\Job {
 
-    /** @var models\Member[] */
-    private $members = [];
+    const REPO_URL  = 'https://github.com/unitedstates/congress-legislators';
+    const REPO_PATH = '/unitedstates/congress-legislators';
 
     /** @var models\Member[] */
-    private $congressIndex = [];
+    private $members = [];
+    /** @var models\MemberTerm[]  */
+    private $member_terms = [];
+
+    /** @var array */
+    private $member_index = [];
 
     /**
      * Main work function
      */
     protected function doWork() {
-        $this->getExecutive();
-        $this->getCongress();
-        $this->getSocialMedia();
-        $this->getCommittees();
+        try {
+            $oldHead = Git::head(self::REPO_PATH);
+            $result  = Git::pull(self::REPO_URL, self::REPO_PATH);
+            $newHead = Git::head(self::REPO_PATH);
 
-        foreach ($this->members as $member)
-            $member->save();
+            if ($newHead['Hash'] === $oldHead['Hash']) {
+                Debug::info(__METHOD__ . " No new updates");
+                return;
+            }
 
-        foreach ($this->congressIndex as $memberId => &$index)
-            $index = $this->members[$memberId]->getIndexEntry();
+            $this->getExecutive();
+            $this->getCongress();
+            $this->getCongressHistory();
+            $this->getSocialMedia();
+            $this->getCommittees();
+            $this->getCommitteeMembership();
 
-        $indexFile = ROOT . '/api/static/us/congress.json';
-        @mkdir(dirname($indexFile), 0777, true);
-        @file_put_contents($indexFile, json_encode($this->congressIndex));
-        @chmod($indexFile, 0777);
+            models\Member::insertMulti($this->members, true);
+            models\MemberTerm::insertMulti($this->member_terms, true);
 
-
+        } catch (Exception $e) {
+            Debug::error(__METHOD__ . ': ' . $e->getMessage());
+        }
     }
 
     /**
@@ -50,44 +62,86 @@ class ImportMembers extends \core\Job {
      * @return mixed
      */
     private function getData($path) {
-        $cacheDir = ROOT . '/cache';
-        if (!is_dir($cacheDir))
-            mkdir($cacheDir, 0777, true);
-
-        if (file_exists("$cacheDir/$path") && filemtime("$cacheDir/$path") > strtotime('-1 day')) {
-            Debug::info("Cache Hit $path");
-            return Yaml::parse(file_get_contents("$cacheDir/$path"), Yaml::PARSE_OBJECT_FOR_MAP);
-        } else {
-            Debug::info("Cache Miss $path");
-        }
-
-        $curl = CURL::new("https://theunitedstates.io/congress-legislators/$path");
-        $curl->setOpt(CURLOPT_TIMEOUT, 60);
-        $yaml = $curl->exec();
-
-        file_put_contents("$cacheDir/$path", $yaml);
-
-        return Yaml::parse($yaml, Yaml::PARSE_OBJECT_FOR_MAP);
+        return Yaml::parse(file_get_contents(ROOT . "/repos/unitedstates/congress-legislators/$path"), Yaml::PARSE_OBJECT_FOR_MAP);
     }
 
     /**
-     * Adds a member to the array
-     * @param $memberRow
-     * @return models\Member
+     * @param $field
+     * @param $value
+     * @return string|null
      */
-    private function addMember($data) {
-        $id = $data->id->bioguide ?? $data->id->govtrack;
+    private function getMemberIdFrom($field, $value) {
+        return @$this->member_index["$field.$value"] ?? null;
+    }
 
-        // rename 'id' to 'appIds'
-        $data->appIds = (object)$data->id;
-        $data->id = $id;
+    /**
+     * Adds a member to the database
+     * @param object $ext Yaml Member Row
+     * @return null
+     */
+    private function addMember($ext) {
+        if (!isset($ext->id))
+            return null;
 
-        if (!isset($this->members[$id]))
-            $this->members[$id] = new models\Member($data);
-        else
-            $this->members[$id]->setVars($data);
+        if (isset($ext->name, $ext->bio)) {
+            $name = $ext->name->official_full ?? implode(' ', (array)$ext->name);
+            $mId  = models\Member::calculateId($name, @$ext->bio->birthday);
+        }
 
-        return $this->members[$id];
+        if (!isset($mId) && isset($ext->id->bioguide))
+            $mId = $this->getMemberIdFrom('bioguide_id', $ext->id->bioguide);
+
+        if (!isset($mId) && isset($ext->id->govtrack))
+            $mId = $this->getMemberIdFrom('govtrack_id', $ext->id->govtrack);
+
+        if (!isset($mId))
+            return Debug::error(__METHOD__ . " Failed to find Member. " . json_encode($ext));
+
+        $m = $this->members[$mId] ?? $this->members[$mId] = new models\Member(['member_id' => $mId]);
+
+        if (isset($ext->id)) {
+            $m->bioguide_id      = $ext->id->bioguide ?? $m->bioguide_id;
+            $m->thomas_id        = $ext->id->thomas ?? $m->thomas_id;
+            $m->govtrack_id      = $ext->id->govtrack ?? $m->govtrack_id;
+            $m->opensecrets_id   = $ext->id->opensecrets ?? $m->opensecrets_id;
+            $m->votesmart_id     = $ext->id->votesmart ?? $m->votesmart_id;
+            $m->cspan_id         = $ext->id->cspan ?? $m->cspan_id;
+            $m->wikipedia_id     = $ext->id->wikipedia ?? $m->wikipedia_id;
+            $m->house_history_id = $ext->id->house_history ?? $m->house_history_id;
+            $m->ballotpedia_id   = $ext->id->ballotpedia ?? $m->ballotpedia_id;
+            $m->maplight_id      = $ext->id->maplight ?? $m->maplight_id;
+            $m->icpsr_id         = $ext->id->icpsr ?? $m->icpsr_id;
+            $m->wikidata_id      = $ext->id->wikidata ?? $m->wikidata_id;
+            $m->google_entity_id = $ext->id->google_entity_id ?? $m->google_entity_id;
+
+            // set indexes
+            if ($m->bioguide_id) $this->member_index["bioguide_id.$m->bioguide_id"] = $mId;
+            if ($m->govtrack_id) $this->member_index["govtrack_id.$m->govtrack_id"] = $mId;
+        }
+
+        if (isset($ext->name)) {
+            $m->first_name = $ext->name->first ?? $m->first_name;
+            $m->last_name  = $ext->name->last ?? $m->last_name;
+            $m->full_name  = $ext->name->official_full ?? trim("$m->first_name $m->last_name");
+        }
+
+        if (isset($ext->bio)) {
+            $m->date_of_birth = $ext->bio->birthday ?? $m->date_of_birth;
+            $m->gender        = $ext->bio->gender ?? $m->gender;
+            $m->religion      = $ext->bio->religion ?? $m->religion;
+        }
+
+        if (isset($ext->social)) {
+            $m->twitter_id   = $ext->social->twitter_id ?? $ext->social->twitter ?? $m->twitter_id;
+            $m->instagram_id = $ext->social->instagram_id ?? $ext->social->instagram ?? $m->instagram_id;
+            $m->facebook_id  = $ext->social->facebook_id ?? $ext->social->facebook ?? $m->facebook_id;
+            $m->youtube_id   = $ext->social->youtube_id ?? $ext->social->youtube ?? $m->youtube_id;
+        }
+
+        if (isset($ext->terms))
+            foreach ($ext->terms as $term)
+                $this->member_terms[] = models\MemberTerm::new($term)->setVars(['member_term_id' => md5($mId.$term->start.$term->type), 'member_id' => $mId]);
+
     }
 
     /**
@@ -95,13 +149,11 @@ class ImportMembers extends \core\Job {
      */
     private function getExecutive() {
         Debug::info(__METHOD__ . ': Getting Data');
+        $startTime = microtime(true);
 
         $data = $this->getData('executive.yaml');
-        foreach ($data as $row) {
-            $member = $this->addMember($row);
-            if ($member->isInOffice())
-                $this->congressIndex[$member->id] = null;
-        }
+        array_map([$this, 'addMember'], $data);
+        Debug::info(__METHOD__ . ': Finished in ' . number_format(microtime(true) - $startTime, 4) . ' sec');
     }
 
     /**
@@ -109,13 +161,11 @@ class ImportMembers extends \core\Job {
      */
     private function getCongress() {
         Debug::info(__METHOD__ . ': Getting Data');
+        $startTime = microtime(true);
 
         $data = $this->getData('legislators-current.yaml');
-        foreach ($data as $row) {
-            $member = $this->addMember($row);
-            $this->congressIndex[$member->id] = null;
-        }
-
+        array_map([$this, 'addMember'], $data);
+        Debug::info(__METHOD__ . ': Finished in ' . number_format(microtime(true) - $startTime, 4) . ' sec');
     }
 
     /**
@@ -123,9 +173,11 @@ class ImportMembers extends \core\Job {
      */
     private function getCongressHistory() {
         Debug::info(__METHOD__ . ': Getting Data');
+        $startTime = microtime(true);
 
         $data = $this->getData('legislators-historical.yaml');
         array_map([$this, 'addMember'], $data);
+        Debug::info(__METHOD__ . ': Finished in ' . number_format(microtime(true) - $startTime, 4) . ' sec');
     }
 
     /**
@@ -133,9 +185,11 @@ class ImportMembers extends \core\Job {
      */
     private function getSocialMedia() {
         Debug::info(__METHOD__ . ': Getting Data');
+        $startTime = microtime(true);
 
         $data = $this->getData('legislators-social-media.yaml');
         array_map([$this, 'addMember'], $data);
+        Debug::info(__METHOD__ . ': Finished in ' . number_format(microtime(true) - $startTime, 4) . ' sec');
     }
 
     /**
@@ -143,66 +197,48 @@ class ImportMembers extends \core\Job {
      */
     private function getCommittees() {
         Debug::info(__METHOD__ . ': Getting Data');
+        $startTime = microtime(true);
 
-        $cData  = $this->getData('committees-current.yaml');
-        $cmData = $this->getData('committee-membership-current.yaml');
+        $cData      = $this->getData('committees-current.yaml');
         $committees = [];
 
+        // add committees and subcommittees
         foreach ($cData as $row) {
-            $row->id = $row->thomas_id;
+            $row->committee_id = $row->thomas_id;
+            $committees[]      = models\Committee::new($row);
 
             // if there are subs, index by thomas_id
-            if (isset($row->subcommittees)) {
-                $subs = [];
+            if (isset($row->subcommittees))
                 foreach ($row->subcommittees as $sub)
-                    $subs[$sub->thomas_id] = $sub;
-
-                $row->subcommittees = $subs;
-            }
-
-
-            $committees[$row->id] = new models\Committee((array)$row);
+                    $committees[] = models\Committee::new($row)->setVars($sub)->setVars(['committee_id' => $row->thomas_id . $sub->thomas_id, 'parent' => $row->thomas_id]);
         }
 
+        models\Committee::insertMulti($committees, true);
+        Debug::info(__METHOD__ . ': Finished in ' . number_format(microtime(true) - $startTime, 4) . ' sec');
+    }
+
+    /**
+     * Pulls YAML data from theunitedstates.io and saves it
+     */
+    private function getCommitteeMembership() {
+        Debug::info(__METHOD__ . ': Getting Data');
+        $startTime = microtime(true);
+
+        $cmData = $this->getData('committee-membership-current.yaml');
+        $m_c    = [];
         foreach ($cmData as $cIdFull => $cMembers) {
-            $scId = null; // assume not a subcommittee
-            $cId  = $cIdFull;
-
-            // break apart subcommittee if it exists
-            if (strlen($cIdFull) > 4)
-                list($cId, $scId) = [substr($cIdFull, 0, 4), substr($cIdFull, 4)];
-
-            if (!isset($committees[$cId]) && !isset($committees[$cIdFull])) {
-                Debug::info("Committee $cIdFull not found.");
-                continue;
-            }
-
-            if (!is_array($committees[$cId]->members))
-                $committees[$cId]->members = [];
-
-            foreach ($cMembers as $mData) {
-                $mId = $mData->bioguide;
-
-                // store member in the committee
-                $committees[$cId]->members[$mId] = $mData->name;
-
-                if (!isset($this->members[$mId])) {
-                    Debug::info(__METHOD__ . " member $mId not found");
-                    continue;
-                }
-
-                // store committee in member
-                if (!is_array($this->members[$mId]->committees))
-                    $this->members[$mId]->committees = [];
-
-                $this->members[$mId]->committees[$cIdFull] = $committees[$cId]->subcommittees[$scId]->name ?? $committees[$cId]->name ?? 'N/A';
-
+            foreach ($cMembers as $cMember) {
+                $mId   = $this->getMemberIdFrom('bioguide_id', $cMember->bioguide);
+                $m_c[] = models\MemberCommittee::new([
+                    'member_committee_id' => models\MemberCommittee::calculateId($mId, $cIdFull),
+                    'member_id'           => $mId,
+                    'committee_id'        => $cIdFull,
+                ]);
             }
         }
 
-         foreach ($committees as $c)
-            $c->save();
-
+        models\MemberCommittee::insertMulti($m_c, true);
+        Debug::info(__METHOD__ . ': Finished in ' . number_format(microtime(true) - $startTime, 4) . ' sec');
     }
 
 }

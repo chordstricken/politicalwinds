@@ -3,10 +3,6 @@
 namespace core;
 
 use \Exception;
-use MongoDB\Driver\BulkWrite;
-use MongoDB\Driver\Query;
-use MongoDB\Driver\Command;
-use MongoDB\BSON;
 
 /**
  * @author Jason Wright <jason@silvermast.io>
@@ -19,8 +15,8 @@ abstract class Model {
     /** @var mixed */
     protected static $_indexes;
 
-    public $dateAdded;
-    public $dateModified;
+    public $date_added;
+    public $date_modified;
 
     /**
      * Base constructor.
@@ -35,7 +31,12 @@ abstract class Model {
      * @return $this
      */
     public function setVars($vars = []) {
-        if (is_object($vars)) $vars = get_object_vars($vars);
+        if (empty($vars))
+            return $this;
+
+        if (is_object($vars))
+            $vars = get_object_vars($vars);
+
         foreach ($vars as $key => $val)
             if (property_exists($this, $key)) $this->$key = $val;
 
@@ -106,14 +107,6 @@ abstract class Model {
     abstract public static function findMulti($query, $queryOptions = []);
 
     /**
-     * Returns an array of objects (in memory)
-     * @param $query
-     * @param $set
-     * @return bool
-     */
-    abstract public static function updateMulti($query, $set);
-
-    /**
      * Deletes objects from the table
      * @param $query
      * @return int|false
@@ -121,4 +114,19 @@ abstract class Model {
      */
     abstract public static function deleteMulti(array $query);
 
+    /**
+     * Inserts an array of objects
+     * @param $set
+     * @param bool $replace
+     * @return bool
+     */
+    abstract public static function insertMulti($set, $replace = false);
+
+    /**
+     * Returns an array of objects (in memory)
+     * @param $query
+     * @param $set
+     * @return bool
+     */
+    abstract public static function updateMulti($query, $set);
 }

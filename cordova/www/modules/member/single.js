@@ -2,12 +2,13 @@ var _vueObj = {
     el: '#vue-app',
     data: {
         params: {},
-        isbusy: true,
+        isBusy: true,
         member: {},
         showRawData: false,
     },
     created: function() {
         var scope = this;
+
         API.getJSON({
             path: '/api/static/members/' + scope.params.memberId[0] + '/' + scope.params.memberId + '.json',
             success: function(result) {
@@ -17,8 +18,7 @@ var _vueObj = {
                     });
 
                 scope.member = result;
-                scope.isbusy = false;
-                scope.$forceUpdate();
+                scope.isBusy = false;
             }
         });
     },
